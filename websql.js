@@ -250,7 +250,7 @@
             createTbls: function (tbls) {
                 var tbls = tbls || this.tbls;
                 var _this = this;
-                
+
                 this.db.transaction(function (tx) {
                     for (var t in tbls) {
                         var flds = tbls[t].map(function (t) {
@@ -297,7 +297,7 @@
                 });
             },
             empty: function (tbls, callback) {
-                var tbls = tbls || this.tbls;
+                var tbls = tbls == null || tbls.length == 0 ? this.tbls : tbls;
                 var _this = this;
                 var del = function (tx, t) {
                     var sql = `DELETE FROM ${t}`
