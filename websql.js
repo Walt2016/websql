@@ -248,7 +248,14 @@
         return _.createClass(Websql, {
             _: _,
             createTbls: function (tbls) {
-                var tbls = tbls || this.tbls;
+                // var tbls = tbls || this.tbls;
+                var tbls = tbls || [];
+                var _this = this;
+                if (tbls.length === 0) {
+                    for (var tbl in _this.tbls) {
+                        tbls.push(tbl)
+                    }
+                }
                 this.db.transaction(function (tx) {
                     for (var t in tbls) {
                         var sql = `CREATE TABLE IF NOT EXISTS ${t}(${tbls[t]})`
