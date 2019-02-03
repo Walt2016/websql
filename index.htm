@@ -288,8 +288,11 @@
                 case "add":
                     for (var tbl in data) {
                         console.log(tbl)
-                        ws.insert(tbl, data[tbl])
+                        ws.insert(tbl, data[tbl], reflashList)
                     }
+                    break;
+                case "empty":
+                    ws.empty([], reflashList);
                     break;
                 case "del":
                     ws.del("SSF_ORDER_DETAILS", 1);
@@ -323,6 +326,14 @@
                 }, options))))
             });
         }
+        var reflashList = function (tbl) {
+            console.log(tbl);
+            var activeLi = document.querySelector(".slide .hd li[active]");
+            if (activeLi) {
+                var tname = activeLi.innerText.trim();
+                if (tbl === tname) createList([tname]);
+            }
+        };
         // var createListBody=function(tbls, options){
 
 
@@ -355,7 +366,7 @@
                         var tname = _.closest(el, "table").getAttribute("tablename");
 
                         //
-                       var options={
+                        var options = {
                             orderby: prop + " " + seq
                         }
                         ws.list([tname], options || {}, function (rs, tname) {
@@ -363,7 +374,7 @@
                                 seq: true,
                                 rowid: true,
                                 check: true
-                            }, options), "tbody"),tbody)
+                            }, options), "tbody"), tbody)
                         });
                     }
                 }

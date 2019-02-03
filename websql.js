@@ -248,26 +248,29 @@
         return _.createClass(Websql, {
             _: _,
             createTbls: function (tbls) {
-                // var tbls = tbls || this.tbls;
-                var tbls = tbls || [];
+                var tbls = tbls || this.tbls;
                 var _this = this;
-                if (tbls.length === 0) {
-                    for (var tbl in _this.tbls) {
-                        tbls.push(tbl)
-                    }
-                }
                 this.db.transaction(function (tx) {
                     for (var t in tbls) {
-                        var sql = `CREATE TABLE IF NOT EXISTS ${t}(${tbls[t]})`
+                        var flds = tbls[t].map(function (t) {
+                            return t.prop ? t.prop : t;
+                        });
+                        var sql = `CREATE TABLE IF NOT EXISTS ${t}(${flds})`
                         console.log(sql)
-                        tx.executeSql(sql)
+                        tx.executeSql(sql, [], function (ctx, result) {
+                            console.log("创建表成功 " + t);
+                        }, function (tx, error) {
+                            console.error('创建表失败:' + t + error.message);
+                            // throw new Error(error);
+                            _this.errorCall && _this.errorCall(error.message)
+                        })
                     }
                 });
             },
-            insert: function (tbl, rs) {
-                var self = this;
+            insert: function (tbl, rs, callback) {
+                var _this = this;
                 this.db.transaction(function (tx) {
-                    var flds = self.tbls[tbl].map(function (t) {
+                    var flds = _this.tbls[tbl].map(function (t) {
                         return t.prop ? t.prop : t;
                     });
                     console.log(flds)
@@ -276,12 +279,25 @@
                         var vs = flds.map(function (t) {
                             return r[t]
                         });
-                        tx.executeSql(sql, vs);
+                        // tx.executeSql(sql, vs);
+                        tx.executeSql(sql, vs, function (tx, result) {
+                            console.log("insert ok")
+                            console.log(tx, result)
+
+                        }, function (tx, error) {
+                            console.log("insert fail")
+                            console.log(error.message)
+                            // throw new Error(error);
+                            _this.errorCall && _this.errorCall(error.message)
+
+                        });
                     })
+                    callback && callback(tbl);
                 });
             },
-            empty: function (tbls) {
+            empty: function (tbls, callback) {
                 var tbls = tbls || this.tbls;
+                var _this = this;
                 var del = function (tx, t) {
                     var sql = `DELETE FROM ${t}`
                     console.log(tx, sql)
@@ -289,11 +305,14 @@
                         console.log("删除表成功 " + t);
                     }, function (tx, error) {
                         console.error('删除表失败:' + t + error.message);
+                        // throw new Error(error);
+                        _this.errorCall && _this.errorCall(error.message)
                     })
                 }
                 this.db.transaction(function (tx) {
                     for (var t in tbls) {
                         del(tx, t)
+                        callback && callback(t)
                     }
                 });
             },
