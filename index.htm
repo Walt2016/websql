@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="btn-group">
+        <div class="btn init">初始</div>
+        <div class="btn del">刪除</div>
+        <div class="btn add">增加</div>
+        <div class="btn empty">清空数据</div>
+        <div class="btn list">列表</div>
+    </div>
+    <div class="slide">
+        <div class="slide_container">
+            <div class="hd">
+            </div>
+            <ul class="bd">
+            </ul>
+        </div>
+    </div>
+    <script src="websql.js"></script>
+    <script>
+        //表结构描述简单格式
+        var tbls = {
+            "SSF_GOODS": ["GOODSID", "GOODSNAME", "PPRICE", "STATUS"],
+            "SSF_ORDER": ["ORDERID", "AMOUNT", "PAYDATE"],
+            "SSF_ORDER_DETAILS": ["DETAILSID", "ORDERID", "GOODSID", "QUANTITY", "PRICE", "AMOUNT"]
+        }
+        //表结构描述复杂格式
+        var SSF_GOODS = [{
+                prop: "GOODSID",
+                label: "商品编号",
+                type: "string"
+            },
+            {
+                prop: "GOODSNAME",
+                label: "商品名",
+                type: "string"
+            },
+            {
+                prop: "PPRICE",
+                label: "金额",
+                type: "number"
+            },
+            {
+                prop: "STATUS",
+                label: "状态",
+                type: "string"
+            },
+        ];
+        var SSF_ORDER = [{
+                prop: "ORDERID",
+                label: "订单编号",
+                type: "string"
+            },
+            {
+                prop: "AMOUNT",
+                label: "数量",
+                type: "number"
+            },
+            {
+                prop: "PAYDATE",
+                label: "支付日期",
+                type: "date"
+            }
+        ]
+        var SSF_ORDER_DETAILS = [{
+                prop: "DETAILSID",
+                label: "编号",
+                type: "string"
+            },
+            {
+                prop: "ORDERID",
+                label: "订单编号",
+                type: "string"
+            },
+            {
+                prop: "GOODSID",
+                label: "商品编号",
+                type: "string"
+            },
+            {
+                prop: "QUANTITY",
+                label: "等级",
+                type: "string"
+            },
+            {
+                prop: "PRICE",
+                label: "金额",
+                type: "number"
+            },
+            {
+                prop: "AMOUNT",
+                label: "数量",
+                type: "number"
+            },
+
+        ];
+
+        var tbls = {
+            "SSF_GOODS": SSF_GOODS,
+            "SSF_ORDER": SSF_ORDER,
+            "SSF_ORDER_DETAILS": SSF_ORDER_DETAILS
+        }
+        var goodsList = [{
+                GOODSID: 32011,
+                GOODSNAME: "A",
+                PPRICE: 5.5,
+                STATUS: 1
+            },
+            {
+                GOODSID: 32012,
+                GOODSNAME: "B",
+                PPRICE: 8,
+                STATUS: 1
+            },
+            {
+                GOODSID: 32019,
+                GOODSNAME: "C",
+                PPRICE: 12.3,
+                STATUS: 1
+            },
+            {
+                GOODSID: 32017,
+                GOODSNAME: "D",
+                PPRICE: 6.6,
+                STATUS: 1
+            },
+            {
+                GOODSID: 32015,
+                GOODSNAME: "E",
+                PPRICE: 14.9,
+                STATUS: 1
+            },
+            {
+                GOODSID: 32038,
+                GOODSNAME: "F",
+                PPRICE: 8.9,
+                STATUS: 1
+            }
+        ];
+        var orderList = [{
+                ORDERID: 51104,
+                AMOUNT: 72.5,
+                PAYDATE: "2019/1/2"
+            },
+            {
+                ORDERID: 51105,
+                AMOUNT: 56,
+                PAYDATE: "2019/1/2"
+            },
+            {
+                ORDERID: 51106,
+                AMOUNT: 53.8,
+                PAYDATE: "2019/1/4"
+            },
+            {
+                ORDERID: 51107,
+                AMOUNT: 33.7,
+                PAYDATE: "2019/1/15"
+            },
+            {
+                ORDERID: 51108,
+                AMOUNT: 120.6,
+                PAYDATE: "2019/1/12"
+            }
+        ];
+        var orderDetailsList = [{
+                DETAILSID: 62134,
+                ORDERID: 51104,
+                GOODSID: 32011,
+                QUANTITY: 1,
+                PRICE: 8.9,
+                AMOUNT: 8.9
+            },
+            {
+                DETAILSID: 62135,
+                ORDERID: 51104,
+                GOODSID: 32015,
+                QUANTITY: 4,
+                PRICE: 15.9,
+                AMOUNT: 63.6
+            },
+            {
+                DETAILSID: 62136,
+                ORDERID: 51105,
+                GOODSID: 32012,
+                QUANTITY: 7,
+                PRICE: 8,
+                AMOUNT: 56
+            },
+            {
+                DETAILSID: 62137,
+                ORDERID: 51107,
+                GOODSID: 32012,
+                QUANTITY: 3,
+                PRICE: 8,
+                AMOUNT: 24
+            },
+            {
+                DETAILSID: 62138,
+                ORDERID: 51107,
+                GOODSID: 32019,
+                QUANTITY: 8,
+                PRICE: 9.6,
+                AMOUNT: 76.8
+            },
+            {
+                DETAILSID: 62139,
+                ORDERID: 51107,
+                GOODSID: 32015,
+                QUANTITY: 15,
+                PRICE: 16.1,
+                AMOUNT: 241.5
+            },
+            {
+                DETAILSID: 62141,
+                ORDERID: 51108,
+                GOODSID: 32019,
+                QUANTITY: 9,
+                PRICE: 10.6,
+                AMOUNT: 95.4
+            },
+            {
+                DETAILSID: 62142,
+                ORDERID: 51108,
+                GOODSID: 32011,
+                QUANTITY: 7,
+                PRICE: 3.6,
+                AMOUNT: 25.2
+            }
+        ];
+
+        var data = {
+            "SSF_GOODS": goodsList,
+            "SSF_ORDER": orderList,
+            "SSF_ORDER_DETAILS": orderDetailsList
+        }
+
+
+        var ws = websql({
+            tbls: tbls,
+            data: data
+        })
+        console.log(ws)
+
+        var _ = ws._;
+
+        var hd = document.querySelector(".slide .hd")
+        // hd.innerHTML = ws.hd();
+        hd.appendChild(ws.createHd())
+
+        _.addEvent("click", hd, function (e) {
+            var el = e.target;
+            console.log(el)
+            var li = _.closest(el, "li")
+
+
+            if (li) {
+                var oldLi = document.querySelector(".slide .hd li[active]")
+                oldLi && oldLi.removeAttribute("active");
+                li.setAttribute("active", "")
+                var tname = li.innerText;
+                console.log(tname)
+                // showList([tname])
+                // var tblname=
+                createList([tname])
+            }
+        })
+
+
+
+        var btnGroup = document.querySelector(".btn-group")
+        _.addEvent("click", btnGroup, function (e) {
+            var act = e.target.className.split(" ")[1]
+            console.log(e.target, act)
+            switch (act) {
+                case "list":
+                    showList();
+                    break;
+                case "add":
+                    for (var tbl in data) {
+                        console.log(tbl)
+                        ws.insert(tbl, data[tbl])
+                    }
+                    break;
+                case "del":
+                    ws.del("SSF_ORDER_DETAILS", 1);
+                    break;
+                default:
+                    ws[act]()
+            }
+        })
+
+        var bd = document.querySelector(".slide .bd")
+        var showList = function (tbls) {
+            var tbls = tbls || []
+            bd.innerHTML = "";
+            ws.list(tbls, {}, function (rs, tname) {
+                bd.innerHTML +=
+                    ws._.wrap("li", ws.grid(tname, rs, {
+                        seq: true,
+                        rowid: true,
+                        check: true
+                    }))
+            });
+        }
+        var createList = function (tbls, options) {
+            var tbls = tbls || []
+            bd.innerHTML = "";
+            ws.list(tbls, options || {}, function (rs, tname) {
+                bd.appendChild(_.createEle("li", ws.createGrid(tname, rs, _.extend({
+                    seq: true,
+                    rowid: true,
+                    check: true
+                }, options))))
+            });
+        }
+        // var createListBody=function(tbls, options){
+
+
+
+        // }
+
+
+        _.addEvent("click", bd, function (e) {
+            var el = e.target
+            var thead = _.closest(el, "thead")
+
+            if (thead) {
+                var tbody = thead.nextSibling;
+                if (el.nodeName.toLowerCase() === "input" && el.getAttribute("type") === "checkbox") {
+                    //全选
+                    var inputs = _.queryAll("input[type='checkbox']", tbody);
+                    inputs.forEach(function (t) {
+                        t.checked = el.checked; //!t.checked;
+                    })
+                } else {
+                    //排序
+                    var td = _.closest(el, "th")
+                    var prop = td.getAttribute("prop")
+                    if (prop) {
+                        var seq = td.getAttribute("seq")
+                        seq = seq === "desc" ? "asc" : "desc"
+                        var oldTd = document.querySelector("th[seq]")
+                        oldTd && oldTd.removeAttribute("seq")
+                        td.setAttribute("seq", seq)
+                        var tname = _.closest(el, "table").getAttribute("tablename");
+
+                        //
+                       var options={
+                            orderby: prop + " " + seq
+                        }
+                        ws.list([tname], options || {}, function (rs, tname) {
+                            tbody.parentNode.replaceChild(ws.createGrid(tname, rs, _.extend({
+                                seq: true,
+                                rowid: true,
+                                check: true
+                            }, options), "tbody"),tbody)
+                        });
+                    }
+                }
+            } else {
+                var tr = _.closest(el, "tr")
+                if (!tr) return;
+                var old = document.querySelector("tr[active]")
+                old && old.removeAttribute("active")
+                tr.setAttribute("active", "");
+                // var codeHex = tr.children[getColumIndex("startHex")].innerText
+                // self.codeIpt.value = Number("0x" + codeHex);
+                // self.hexcodeIpt.value = codeHex;
+                // self.countIpt.value = Number(tr.children[getColumIndex("count")].innerText)
+                // self.searchBtn.click()
+
+            }
+
+        })
+    </script>
+    <table>
+        <tr>
+            <td></td>
+        </tr>
+    </table>
+</body>
+
+</html>
