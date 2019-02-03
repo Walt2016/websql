@@ -242,14 +242,14 @@ a {
     margin-right: 10px;
     color:#ccc;
 }
-/* .btn:nth-child(3)::before{
+.btn:nth-child(3)::before{
     content: "\2462";
     width: 15px;
     height: 15px;
     font-size: 12px;
     margin-right: 10px;
     color:#ccc;
-} */
+}
 .btn:nth-child(4)::before{
     content: "\2463";
     width: 15px;

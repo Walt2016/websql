@@ -184,6 +184,11 @@
         },
         //创建DOm 方式
         createEle: function (tag, text, options) {
+            var i = tag.indexOf(" ");
+            if (i > 0) {
+                var leftTag = tag.substring(0, i)
+                return _.createEle(leftTag, _.createEle(tag.substring(i + 1), text, options))
+            }
             var ele = document.createElement(tag);
             var append = function (text) {
                 switch (_.type(text)) {
