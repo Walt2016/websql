@@ -250,6 +250,7 @@
             createTbls: function (tbls) {
                 var tbls = tbls || this.tbls;
                 var _this = this;
+                
                 this.db.transaction(function (tx) {
                     for (var t in tbls) {
                         var flds = tbls[t].map(function (t) {
