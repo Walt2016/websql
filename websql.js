@@ -297,6 +297,7 @@
                 });
             },
             empty: function (tbls, callback) {
+                
                 var tbls = tbls == null || tbls.length == 0 ? this.tbls : tbls;
                 var _this = this;
                 var del = function (tx, t) {
