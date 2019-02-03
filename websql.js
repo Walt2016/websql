@@ -297,7 +297,7 @@
                 });
             },
             empty: function (tbls, callback) {
-                
+
                 var tbls = tbls == null || tbls.length == 0 ? this.tbls : tbls;
                 var _this = this;
                 var del = function (tx, t) {
@@ -614,10 +614,3 @@
     }
     return _websql
 })
-
-
-
-
-// // db.transaction(function(tx) {
-// //     tx.executeSql('UPDATE LOGS SET log=\'www.w3cschool.cc\' WHERE id=?', [id]);
-// // });
