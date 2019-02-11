@@ -238,8 +238,9 @@
                 options.desc,
                 options.dbsize
             );
+            //表结构
             this.tbls = options.tbls;
-            //操作数据
+            //表数据
             this.data = options.data;
             //所有数据
             this.rs = [];
@@ -403,6 +404,160 @@
                         })
                     ])
                 }))
+            },
+            createSlide: function () {
+                var _this = this;
+
+                var hd = _.createEle("div", this.createHd(), {
+                    class: "hd"
+                })
+
+
+                var bd = _.createEle("div", '', {
+                    class: "bd"
+                })
+                var container = _.createEle("div", [hd, bd], {
+                    class: "slide_container"
+                })
+                _.addEvent("click", hd, function (e) {
+                    var el = e.target;
+                    console.log(el)
+                    var li = _.closest(el, "li")
+
+                    if (li) {
+                        var oldLi = _.query(".slide .hd li[active]")
+                        oldLi && oldLi.removeAttribute("active");
+                        li.setAttribute("active", "")
+                        var tname = li.innerText;
+                        console.log(tname)
+                        // showList([tname])
+                        // var tblname=
+                        _this.createList([tname])
+                    }
+                })
+                _.addEvent("click", bd, function (e) {
+                    var el = e.target
+                    var thead = _.closest(el, "thead")
+                    var table=_.closest(el, "table")
+
+                    if (thead) {
+                        var tbody = thead.nextSibling;
+                        if (el.nodeName.toLowerCase() === "input" && el.getAttribute("type") === "checkbox") {
+                            //全选
+                            var inputs = _.queryAll("input[type='checkbox']", tbody);
+                            inputs.forEach(function (t) {
+                                t.checked = el.checked; //!t.checked;
+                            })
+                        } else {
+                            //排序
+                            var td = _.closest(el, "th")
+                            if (!td) return;
+                            var prop = td.getAttribute("prop");
+                            if (prop) {
+                                var seq = td.getAttribute("seq")
+                                seq = seq === "desc" ? "asc" : "desc"
+                                _.queryAll("th[seq]",thead).forEach((t)=>{
+                                    t.removeAttribute("seq")
+                                })
+                                td.setAttribute("seq", seq)
+                                var tname = table.getAttribute("tablename");
+                                 var options = {
+                                    orderby: prop + " " + seq
+                                }
+                                _this.list([tname], options || {}, function (rs, tname) {
+                                    tbody.parentNode.replaceChild(_this.createGrid(tname, rs, _.extend({
+                                        seq: true,
+                                        rowid: true,
+                                        check: true
+                                    }, options), "tbody"), tbody)
+                                });
+                            }
+
+                        }
+                    } else {
+                        var tr = _.closest(el, "tr")
+                        if (!tr) return;
+                        _.queryAll("tr[active]",table).forEach((t)=>{
+                            t.removeAttribute("active")
+                        })
+                        tr.setAttribute("active", "");
+                    }
+
+                })
+                return _.createEle("div", container, {
+                    class: "slide"
+                })
+            },
+            createBtns: function () {
+                var btns = [{
+                    key: "createTbls",
+                    val: "初始"
+                }, {
+                    key: "add",
+                    val: "增加"
+                }, {
+                    key: "empty",
+                    val: "清空数据"
+                }, {
+                    key: "list",
+                    val: "列表"
+                }].map((t) => {
+                    return _.createEle("div", t.val, {
+                        class: "btn " + t.key
+                    })
+                })
+                var btnGroup = _.createEle("div", btns, {
+                    class: "btn-group"
+                })
+                var _this = this;
+
+                _.addEvent("click", btnGroup, function (e) {
+                    var act = e.target.className.split(" ")[1]
+                    console.log(e.target, act)
+                    switch (act) {
+                        case "list":
+                            // showList();
+                            _this.createList();
+                            break;
+                        case "add":
+                            for (var tbl in data) {
+                                console.log(tbl)
+                                _this.insert(tbl, data[tbl], _this.reflashList.bind(_this))
+                            }
+                            break;
+                        case "empty":
+                            _this.empty([], _this.reflashList.bind(_this));
+                            break;
+                        case "del":
+                            _this.del("SSF_ORDER_DETAILS", 1);
+                            break;
+                        default:
+                            _this[act]()
+                    }
+                })
+
+                return btnGroup
+            },
+            reflashList: function (tbl) {
+                console.log(tbl);
+                var activeLi = document.querySelector(".slide .hd li[active]");
+                if (activeLi) {
+                    var tname = activeLi.innerText.trim();
+                    if (tbl === tname) this.createList([tname]);
+                }
+            },
+            createList: function (tbls, options) {
+                var bd = document.querySelector(".slide .bd")
+                var _this = this;
+                var tbls = tbls || []
+                bd.innerHTML = "";
+                _this.list(tbls, options || {}, function (rs, tname) {
+                    bd.appendChild(_.createEle("li", _this.createGrid(tname, rs, _.extend({
+                        seq: true,
+                        rowid: true,
+                        check: true
+                    }, options))))
+                });
             },
             createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.tbls[tname];
@@ -614,4 +769,3 @@
     }
     return _websql
 })
-

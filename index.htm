@@ -10,21 +10,9 @@
 </head>
 
 <body>
-    <div class="btn-group">
-        <div class="btn createTbls">初始</div>
-        <!-- <div class="btn del">刪除</div> -->
-        <div class="btn add">增加</div>
-        <div class="btn empty">清空数据</div>
-        <div class="btn list">列表</div>
-    </div>
-    <div class="slide">
-        <div class="slide_container">
-            <div class="hd">
-            </div>
-            <ul class="bd">
-            </ul>
-        </div>
-    </div>
+
+   
+    <div class="sql"></div>
     <script src="websql.js"></script>
     <script>
         //表结构描述简单格式
@@ -247,158 +235,18 @@
 
         var ws = websql({
             tbls: tbls,
-            data: data
+            data: data,
         })
         console.log(ws)
 
-        var _ = ws._;
-
-        var hd = document.querySelector(".slide .hd")
-        // hd.innerHTML = ws.hd();
-        hd.appendChild(ws.createHd())
-
-        _.addEvent("click", hd, function (e) {
-            var el = e.target;
-            console.log(el)
-            var li = _.closest(el, "li")
+        document.querySelector(".sql").appendChild(ws.createBtns())
+        document.querySelector(".sql").appendChild(ws.createSlide())
 
 
-            if (li) {
-                var oldLi = document.querySelector(".slide .hd li[active]")
-                oldLi && oldLi.removeAttribute("active");
-                li.setAttribute("active", "")
-                var tname = li.innerText;
-                console.log(tname)
-                // showList([tname])
-                // var tblname=
-                createList([tname])
-            }
-        })
-
-
-
-        var btnGroup = document.querySelector(".btn-group")
-        _.addEvent("click", btnGroup, function (e) {
-            var act = e.target.className.split(" ")[1]
-            console.log(e.target, act)
-            switch (act) {
-                case "list":
-                    showList();
-                    break;
-                case "add":
-                    for (var tbl in data) {
-                        console.log(tbl)
-                        ws.insert(tbl, data[tbl], reflashList)
-                    }
-                    break;
-                case "empty":
-                    ws.empty([], reflashList);
-                    break;
-                case "del":
-                    ws.del("SSF_ORDER_DETAILS", 1);
-                    break;
-                default:
-                    ws[act]()
-            }
-        })
-
-        var bd = document.querySelector(".slide .bd")
-        var showList = function (tbls) {
-            var tbls = tbls || []
-            bd.innerHTML = "";
-            ws.list(tbls, {}, function (rs, tname) {
-                bd.innerHTML +=
-                    ws._.wrap("li", ws.grid(tname, rs, {
-                        seq: true,
-                        rowid: true,
-                        check: true
-                    }))
-            });
-        }
-        var createList = function (tbls, options) {
-            var tbls = tbls || []
-            bd.innerHTML = "";
-            ws.list(tbls, options || {}, function (rs, tname) {
-                bd.appendChild(_.createEle("li", ws.createGrid(tname, rs, _.extend({
-                    seq: true,
-                    rowid: true,
-                    check: true
-                }, options))))
-            });
-        }
-        var reflashList = function (tbl) {
-            console.log(tbl);
-            var activeLi = document.querySelector(".slide .hd li[active]");
-            if (activeLi) {
-                var tname = activeLi.innerText.trim();
-                if (tbl === tname) createList([tname]);
-            }
-        };
-        // var createListBody=function(tbls, options){
-
-
-
-        // }
-
-
-        _.addEvent("click", bd, function (e) {
-            var el = e.target
-            var thead = _.closest(el, "thead")
-
-            if (thead) {
-                var tbody = thead.nextSibling;
-                if (el.nodeName.toLowerCase() === "input" && el.getAttribute("type") === "checkbox") {
-                    //全选
-                    var inputs = _.queryAll("input[type='checkbox']", tbody);
-                    inputs.forEach(function (t) {
-                        t.checked = el.checked; //!t.checked;
-                    })
-                } else {
-                    //排序
-                    var td = _.closest(el, "th")
-                    var prop = td.getAttribute("prop")
-                    if (prop) {
-                        var seq = td.getAttribute("seq")
-                        seq = seq === "desc" ? "asc" : "desc"
-                        var oldTd = document.querySelector("th[seq]")
-                        oldTd && oldTd.removeAttribute("seq")
-                        td.setAttribute("seq", seq)
-                        var tname = _.closest(el, "table").getAttribute("tablename");
-
-                        //
-                        var options = {
-                            orderby: prop + " " + seq
-                        }
-                        ws.list([tname], options || {}, function (rs, tname) {
-                            tbody.parentNode.replaceChild(ws.createGrid(tname, rs, _.extend({
-                                seq: true,
-                                rowid: true,
-                                check: true
-                            }, options), "tbody"), tbody)
-                        });
-                    }
-                }
-            } else {
-                var tr = _.closest(el, "tr")
-                if (!tr) return;
-                var old = document.querySelector("tr[active]")
-                old && old.removeAttribute("active")
-                tr.setAttribute("active", "");
-                // var codeHex = tr.children[getColumIndex("startHex")].innerText
-                // self.codeIpt.value = Number("0x" + codeHex);
-                // self.hexcodeIpt.value = codeHex;
-                // self.countIpt.value = Number(tr.children[getColumIndex("count")].innerText)
-                // self.searchBtn.click()
-
-            }
-
-        })
     </script>
-    <table>
-        <tr>
-            <td></td>
-        </tr>
-    </table>
+   
+
+    <!-- <textarea name="" id="" cols="30" rows="10"></textarea> -->
 </body>
 
 </html>
