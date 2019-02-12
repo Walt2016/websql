@@ -204,6 +204,7 @@
                         })
                         break;
                     case "null":
+                    case "nan":
                         break;
                     default:
                         ele.appendChild(text)
@@ -602,26 +603,29 @@
 
             },
             //根据rs取得默认表结构
-            getTbl: function (rs) {
+            getTbl: function (rs, tname) {
                 var arr = _.obj2arr(rs[0]),
                     keys = arr.keys,
                     typs = arr.typs;
+                var tbl = this.tbls[tname];
                 return keys.map(function (t, i) {
+                    var fld = tbl.filter(function (f) {
+                        return f.prop === t
+                    })[0]
                     return {
                         prop: t,
-                        label: t,
-                        type: typs[i]
+                        label: fld && fld.label || t,
+                        type: fld && fld.type || typs[i]
                     }
                 })
             },
             createGrid: function (tname, rs, options, resultType) {
-                var tbl = this.tbls[tname] || this.getTbl(rs);
+                // var tbl = this.tbls[tname] || this.getTbl(rs);
+                // tbl.forEach(function (t) {
+                //     t.hide=_.type(rs[0][t.prop]) === "undefined"
+                // })
 
-                tbl.forEach(function (t) {
-                    if (_.type(rs[0][t.prop]) === "undefined") {
-                        t.hide = true
-                    }
-                })
+                var tbl = this.getTbl(rs, tname);
 
                 // var props=
                 var _row = function (r, i) {
@@ -668,6 +672,7 @@
                 if (options.seq) offset++;
 
                 var len = rs.length;
+                var showFoot = false;
 
                 // console.log(options)
                 var orderby = options.orderby || ""
@@ -683,7 +688,11 @@
                             seq = orderby.split(" ")[1] || "asc"
                         }
 
-                        if (!hide) typs.push(typ);
+
+                        if (!hide) {
+                            if (typ === "number") showFoot = true;
+                            typs.push(typ);
+                        }
                         return hide ? "" : _.createEle("th", [_.createEle("div", lable, {
                             class: "text"
                         }), _.createEle("div", "", {
@@ -710,11 +719,11 @@
                         return _row(r, i + 1)
                     });
 
-                tfoot = tfoot.map(function (t) {
+                tfoot = showFoot ? tfoot.map(function (t) {
                     return _.createEle("td", t, {
-                        class: t===""? "string":"number"
+                        class: t === "" ? "string" : "number"
                     });
-                });
+                }) : "";
                 switch (resultType) {
                     case "thead":
                         return _.createEle("thead", thead);
