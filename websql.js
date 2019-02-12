@@ -382,7 +382,7 @@
                 this.exe(sqls, callback)
             },
             //执行sql
-            exe: function (sql, callback) {
+            exe: function (sql, callback, errorCall) {
                 var _this = this;
                 var store = function (tx, sql, tbl) {
                     console.log(sql)
@@ -394,6 +394,9 @@
                             _this.rs[tbl].push(results.rows.item(i));
                         }
                         callback && callback.call(_this, _this.rs[tbl], tbl);
+                    }, function (tx, error) {
+                        // console.error(  error.message);
+                        errorCall && errorCall(error.message)
                     });
 
                 }
@@ -548,7 +551,6 @@
                     console.log(e.target, act)
                     switch (act) {
                         case "list":
-                            // showList();
                             _this.createList();
                             break;
                         case "add":
@@ -579,6 +581,7 @@
                     this.createList([tname]);
                 }
             },
+            //代替showList  创建el方式替代字符串拼接
             createList: function (tbls, options) {
                 var bd = document.querySelector(".slide .bd")
                 var _this = this;
@@ -590,8 +593,6 @@
                         rowid: true,
                         check: true
                     }, options))))
-
-
                     _this.setSqlcmd.call(_this, tname)
                 });
             },
@@ -607,7 +608,7 @@
                 var arr = _.obj2arr(rs[0]),
                     keys = arr.keys,
                     typs = arr.typs;
-                var tbl = this.tbls[tname];
+                var tbl = this.tbls[tname]||[];
                 return keys.map(function (t, i) {
                     var fld = tbl.filter(function (f) {
                         return f.prop === t
@@ -618,16 +619,14 @@
                         type: fld && fld.type || typs[i]
                     }
                 })
-            },
-            createGrid: function (tname, rs, options, resultType) {
+
                 // var tbl = this.tbls[tname] || this.getTbl(rs);
                 // tbl.forEach(function (t) {
                 //     t.hide=_.type(rs[0][t.prop]) === "undefined"
                 // })
-
+            },
+            createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.getTbl(rs, tname);
-
-                // var props=
                 var _row = function (r, i) {
                     var tag = "td",
                         arr = _.obj2arr(r),
@@ -833,6 +832,16 @@
                         tablename: tname
                     });
             },
+            activeHd:function(tbl){
+                var lis = _.queryAll(".slide .hd li")
+                lis.forEach(function (t) {
+                    if (t.innerText === tbl) {
+                        t.setAttribute("active", "")
+                    } else {
+                        t.removeAttribute("active");
+                    }
+                })
+            },
             //
             createSqlcmd: function () {
                 var textarea = _.createEle("textarea", "", {
@@ -852,7 +861,7 @@
                     var sql = textarea.value
                     sql.split(";").forEach(function (t) {
 
-                        var tname = (t.match(/from\s(.*?)\s/i)[1] || "sqlcmd").toUpperCase();
+                        var tname = ((t.match(/from\s(\S+)\s?/i) || [])[1] || "sqlcmd").toUpperCase();
                         console.log(tname)
                         _this.exe({
                             sql: t,
@@ -865,15 +874,10 @@
                                 check: true
                             }, options))))
 
-
-                            var lis = _.queryAll(".slide .hd li")
-                            lis.forEach(function (t) {
-                                if (t.innerText === tbl) {
-                                    t.setAttribute("active", "")
-                                } else {
-                                    t.removeAttribute("active");
-                                }
-                            })
+                            _this.activeHd(tbl)
+                        }, function (errormsg) {
+                            bd.appendChild(document.createTextNode(errormsg))
+                            _this.activeHd("")
 
                         })
 
