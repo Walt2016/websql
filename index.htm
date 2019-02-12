@@ -10,9 +10,8 @@
 </head>
 
 <body>
-
    
-    <div class="sql"></div>
+    <div class="demo"></div>
     <script src="websql.js"></script>
     <script>
         //表结构描述简单格式
@@ -238,10 +237,11 @@
             data: data,
         })
         console.log(ws)
-
-        document.querySelector(".sql").appendChild(ws.createBtns())
-        document.querySelector(".sql").appendChild(ws.createSlide())
-
+        var demo=document.querySelector(".demo")
+        demo.appendChild(ws.createSqlcmd())
+        demo.appendChild(ws.createBtns());
+        demo.appendChild(ws.createSlide())
+        
 
     </script>
    

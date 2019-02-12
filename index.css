@@ -207,7 +207,7 @@ a {
 }
 
 .btn {
-    /* width: 100px; */
+    width: 100px;
     height: 40px;
     line-height: 40px;
     font-size: 12px;
@@ -216,9 +216,12 @@ a {
     /* border: 1px solid #dedede; */
     /* outlin: 1px solid #000; */
     cursor: pointer;
-    flex: 1;
+    
     color: #fff;
     border-bottom: 1px solid #dedede;
+}
+.btn-group .btn{
+    flex: 1;
 }
 
 .btn:hover {
@@ -226,7 +229,7 @@ a {
 }
 
 
-.btn:nth-child(1)::before{
+.btn-group .btn:nth-child(1)::before{
     content: "\2460";
     width: 15px;
     height: 15px;
@@ -234,7 +237,7 @@ a {
     margin-right: 10px;
     color:#ccc;
 }
-.btn:nth-child(2)::before{
+.btn-group .btn:nth-child(2)::before{
     content: "\2461";
     width: 15px;
     height: 15px;
@@ -242,7 +245,7 @@ a {
     margin-right: 10px;
     color:#ccc;
 }
-.btn:nth-child(3)::before{
+.btn-group .btn:nth-child(3)::before{
     content: "\2462";
     width: 15px;
     height: 15px;
@@ -250,13 +253,17 @@ a {
     margin-right: 10px;
     color:#ccc;
 }
-.btn:nth-child(4)::before{
+.btn-group .btn:nth-child(4)::before{
     content: "\2463";
     width: 15px;
     height: 15px;
     /* font-size: 12px; */
     margin-right: 10px;
     color:#ccc;
+}
+
+.sqlcmd{
+    display: flex;
 }
 
 table.dataintable td.number{

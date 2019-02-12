@@ -244,6 +244,7 @@
             this.data = options.data;
             //所有数据
             this.rs = [];
+            this.sqls = {};
         }
 
         return _.createClass(Websql, {
@@ -298,37 +299,49 @@
                 });
             },
             empty: function (tbls, callback) {
-
                 var tbls = tbls == null || tbls.length == 0 ? this.tbls : tbls;
                 var _this = this;
-                var del = function (tx, t) {
-                    var sql = `DELETE FROM ${t}`
-                    console.log(tx, sql)
-                    tx.executeSql(sql, [], function (ctx, result) {
-                        console.log("删除表成功 " + t);
-                    }, function (tx, error) {
-                        console.error('删除表失败:' + t + error.message);
-                        // throw new Error(error);
-                        _this.errorCall && _this.errorCall(error.message)
+                var sqls = []
+                for (var t in tbls) {
+                    sqls.push({
+                        sql: `DELETE FROM ${t}`,
+                        tbl: t
                     })
                 }
-                this.db.transaction(function (tx) {
-                    for (var t in tbls) {
-                        del(tx, t)
-                        callback && callback(t)
-                    }
-                });
+                this.exe(sqls, callback)
+                // var del = function (tx, t) {
+                //     var sql = `DELETE FROM ${t}`
+                //     console.log(tx, sql)
+                //     tx.executeSql(sql, [], function (ctx, result) {
+                //         console.log("删除表成功 " + t);
+                //     }, function (tx, error) {
+                //         console.error('删除表失败:' + t + error.message);
+                //         // throw new Error(error);
+                //         _this.errorCall && _this.errorCall(error.message)
+                //     })
+                // }
+                // this.db.transaction(function (tx) {
+                //     for (var t in tbls) {
+                //         del(tx, t)
+                //         callback && callback(t)
+                //     }
+                // });
             },
             del: function (tbl, ids) {
-                this.db.transaction(function (tx) {
-                    var sql = `DELETE FROM ${tbl} Where rowid in [${ids}]`
-                    console.log(sql)
-                    tx.executeSql(sql, [], function (ctx, result) {
-                        console.log("删除表成功 " + tbl);
-                    }, function (tx, error) {
-                        console.error('删除表失败:' + tbl + error.message);
-                    })
+                var sql = `DELETE FROM ${tbl} Where rowid in [${ids}]`
+
+                this.exe({
+                    sql: sql,
+                    tbl: tbl
                 })
+                // this.db.transaction(function (tx) {
+                //     console.log(sql)
+                //     tx.executeSql(sql, [], function (ctx, result) {
+                //         console.log("删除表成功 " + tbl);
+                //     }, function (tx, error) {
+                //         console.error('删除表失败:' + tbl + error.message);
+                //     })
+                // })
             },
             //查询
             list: function (tbls, options, callback) {
@@ -344,10 +357,10 @@
                 }
                 var condition = arr.join(" & ");
                 if (options.groupby) {
-                    condition += " group by " + options.groupby
+                    condition += " GROUP BY " + options.groupby
                 }
                 if (options.orderby) {
-                    condition += " order by " + options.orderby
+                    condition += " ORDER BY " + options.orderby
                 }
 
                 var tbls = tbls || [];
@@ -357,24 +370,64 @@
                         tbls.push(tbl)
                     }
                 }
-                var store = function (tx, tbl) {
-                    var sql = `SELECT * FROM ${tbl} ${condition}`;
+
+                var sqls = tbls.map(t => {
+                    return {
+                        tbl: t,
+                        sql: `SELECT * FROM ${t} ${condition}`
+                    }
+                    // return `SELECT * FROM ${t} ${condition}`
+                })
+                this.exe(sqls, callback)
+                // var store = function (tx, tbl) {
+                //     var sql = `SELECT * FROM ${tbl} ${condition}`;
+                //     console.log(sql)
+                //     _this.sqls[tbl] = sql;
+                //     _this.rs[tbl] = [];
+                //     _this.exe(sql, callback);
+                //     // tx.executeSql(sql, [], function (tx, results) {
+                //     //     console.log(results)
+                //     //     for (var i = 0; i < results.rows.length; i++) {
+                //     //         _this.rs[tbl].push(results.rows.item(i));
+                //     //     }
+                //     //     callback.call(_this, _this.rs[tbl], tbl);
+                //     // });
+                // }
+                // this.db.transaction(function (tx) {
+                //     console.log(tx)
+                //     tbls.forEach(function (tbl) {
+                //         store(tx, tbl)
+                //     });
+                // });
+            },
+            //执行sql
+            exe: function (sql, callback) {
+                var _this = this;
+                var store = function (tx, sql, tbl) {
                     console.log(sql)
-                    _this.rs[tbl] = [];
                     tx.executeSql(sql, [], function (tx, results) {
                         console.log(results)
+                        _this.sqls[tbl] = sql;
+                        _this.rs[tbl] = [];
                         for (var i = 0; i < results.rows.length; i++) {
                             _this.rs[tbl].push(results.rows.item(i));
                         }
-                        callback.call(_this, _this.rs[tbl], tbl);
+                        callback && callback.call(_this, _this.rs[tbl], tbl);
                     });
+
                 }
                 this.db.transaction(function (tx) {
-                    console.log(tx)
-                    tbls.forEach(function (tbl) {
-                        store(tx, tbl)
-                    });
-                });
+                    if (_.type(sql) === "array") {
+                        sql.forEach(t => {
+                            store(tx, t.sql, t.tbl)
+                        })
+
+                    } else {
+                        store(tx, sql.sql, sql.tbl)
+                    }
+
+                })
+
             },
             //表名导航
             hd: function () {
@@ -430,15 +483,13 @@
                         li.setAttribute("active", "")
                         var tname = li.innerText;
                         console.log(tname)
-                        // showList([tname])
-                        // var tblname=
                         _this.createList([tname])
                     }
                 })
                 _.addEvent("click", bd, function (e) {
                     var el = e.target
                     var thead = _.closest(el, "thead")
-                    var table=_.closest(el, "table")
+                    var table = _.closest(el, "table")
 
                     if (thead) {
                         var tbody = thead.nextSibling;
@@ -456,12 +507,12 @@
                             if (prop) {
                                 var seq = td.getAttribute("seq")
                                 seq = seq === "desc" ? "asc" : "desc"
-                                _.queryAll("th[seq]",thead).forEach((t)=>{
+                                _.queryAll("th[seq]", thead).forEach((t) => {
                                     t.removeAttribute("seq")
                                 })
                                 td.setAttribute("seq", seq)
                                 var tname = table.getAttribute("tablename");
-                                 var options = {
+                                var options = {
                                     orderby: prop + " " + seq
                                 }
                                 _this.list([tname], options || {}, function (rs, tname) {
@@ -470,6 +521,9 @@
                                         rowid: true,
                                         check: true
                                     }, options), "tbody"), tbody)
+
+
+                                    _.query(".sqlcmd textarea").value = _this.sqls[tname] || ""
                                 });
                             }
 
@@ -477,7 +531,7 @@
                     } else {
                         var tr = _.closest(el, "tr")
                         if (!tr) return;
-                        _.queryAll("tr[active]",table).forEach((t)=>{
+                        _.queryAll("tr[active]", table).forEach((t) => {
                             t.removeAttribute("active")
                         })
                         tr.setAttribute("active", "");
@@ -543,7 +597,8 @@
                 var activeLi = document.querySelector(".slide .hd li[active]");
                 if (activeLi) {
                     var tname = activeLi.innerText.trim();
-                    if (tbl === tname) this.createList([tname]);
+                    // if (tbl === tname) 
+                    this.createList([tname]);
                 }
             },
             createList: function (tbls, options) {
@@ -557,10 +612,25 @@
                         rowid: true,
                         check: true
                     }, options))))
+
+                    _.query(".sqlcmd textarea").value = _this.sqls[tname] || ""
                 });
             },
+            //根据rs取得默认表结构
+            getTbl: function (rs) {
+                var arr = _.obj2arr(rs[0]),
+                    keys = arr.keys,
+                    typs = arr.typs;
+                return keys.map(function (t, i) {
+                    return {
+                        prop: t,
+                        label: t,
+                        type: typs[i]
+                    }
+                })
+            },
             createGrid: function (tname, rs, options, resultType) {
-                var tbl = this.tbls[tname];
+                var tbl = this.tbls[tname] || this.getTbl(rs);
                 var _row = function (r, i) {
                     var tag = "td",
                         arr = _.obj2arr(r),
@@ -759,6 +829,44 @@
                         class: "dataintable",
                         tablename: tname
                     });
+            },
+            //
+            createSqlcmd: function () {
+                var textarea = _.createEle("textarea", "", {
+                    cols: "100",
+                    rows: "10",
+                })
+                var btn = _.createEle("div", "执行sql", {
+                    class: "btn exesql"
+                })
+                var _this = this;
+                _.addEvent("click", btn, function (e) {
+                    console.log(textarea.value)
+
+                    var bd = document.querySelector(".slide .bd")
+                    bd.innerHTML = "";
+                    var options = {}
+                    var sql=textarea.value
+                   var tname= sql.match(/from\s(.*?)\s/i)[1]||"sqlcmd";
+                   console.log(tname)
+                    _this.exe({
+                        sql: sql,
+                        tbl: tname
+                    }, function (rs, tbl) {
+                        console.log(rs, tbl)
+
+
+                        bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, _.extend({
+                            seq: true,
+                            rowid: true,
+                            check: true
+                        }, options))))
+
+                    })
+                })
+                return _.createEle("div", [textarea, btn], {
+                    class: "sqlcmd"
+                })
             }
         })
     }();
