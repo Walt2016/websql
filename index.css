@@ -216,11 +216,12 @@ a {
     /* border: 1px solid #dedede; */
     /* outlin: 1px solid #000; */
     cursor: pointer;
-    
+
     color: #fff;
     border-bottom: 1px solid #dedede;
 }
-.btn-group .btn{
+
+.btn-group .btn {
     flex: 1;
 }
 
@@ -229,47 +230,74 @@ a {
 }
 
 
-.btn-group .btn:nth-child(1)::before{
+.btn-group .btn:nth-child(1)::before {
     content: "\2460";
     width: 15px;
     height: 15px;
     /* font-size: 12px; */
     margin-right: 10px;
-    color:#ccc;
+    color: #ccc;
 }
-.btn-group .btn:nth-child(2)::before{
+
+.btn-group .btn:nth-child(2)::before {
     content: "\2461";
     width: 15px;
     height: 15px;
     /* font-size: 12px; */
     margin-right: 10px;
-    color:#ccc;
+    color: #ccc;
 }
-.btn-group .btn:nth-child(3)::before{
+
+.btn-group .btn:nth-child(3)::before {
     content: "\2462";
     width: 15px;
     height: 15px;
     font-size: 12px;
     margin-right: 10px;
-    color:#ccc;
+    color: #ccc;
 }
-.btn-group .btn:nth-child(4)::before{
+
+.btn-group .btn:nth-child(4)::before {
     content: "\2463";
     width: 15px;
     height: 15px;
     /* font-size: 12px; */
     margin-right: 10px;
-    color:#ccc;
+    color: #ccc;
 }
 
-.sqlcmd{
+
+.btn-group {
+    flex-direction: column
+}
+
+.btn-group .btn {
+    width: 200px;
+}
+
+
+.tools {
+    display: flex;
+
+}
+
+.input-group {
     display: flex;
 }
 
-table.dataintable td.number{
+.sqlcmd {
+    display: flex;
+}
+
+.sqlcmd-btn-group>div {
+    margin-bottom: 10px;
+}
+
+table.dataintable td.number {
     color: #F36140
 }
-table.dataintable td.date::before{
+
+table.dataintable td.date::before {
     content: "\23f1";
     font-size: 12px;
     margin-right: 10px;

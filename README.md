@@ -19,5 +19,8 @@
 - 数字 ok
 - 合计 ok
 
+
+- sql ok
+
 ## 演示
 https://walt2016.github.io/websql/

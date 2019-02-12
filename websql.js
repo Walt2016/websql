@@ -216,10 +216,26 @@
             }
             return ele;
         },
-        createCheckbox: function () {
-            return _.createEle("input", '', {
-                type: "checkbox"
-            })
+        createCheckbox: function (options) {
+            // var opt={
+            //     type: "checkbox",
+            // }
+            // if(options&&options.checked){
+            //     opt.checked=true;
+            // }
+
+            var checkbox = _.createEle("input", "", _.extend({
+                type: "checkbox",
+            }, options))
+            if (options) {
+                var label = _.createEle("div", options.label)
+                return _.createEle("div", [checkbox, label], {
+                    class: "input-group"
+                });
+            } else {
+                return checkbox
+            }
+
         }
     }
 
@@ -532,7 +548,7 @@
                     val: "增加"
                 }, {
                     key: "empty",
-                    val: "清空数据"
+                    val: "清空"
                 }, {
                     key: "list",
                     val: "列表"
@@ -608,7 +624,7 @@
                 var arr = _.obj2arr(rs[0]),
                     keys = arr.keys,
                     typs = arr.typs;
-                var tbl = this.tbls[tname]||[];
+                var tbl = this.tbls[tname] || [];
                 return keys.map(function (t, i) {
                     var fld = tbl.filter(function (f) {
                         return f.prop === t
@@ -625,6 +641,7 @@
                 //     t.hide=_.type(rs[0][t.prop]) === "undefined"
                 // })
             },
+            //生成表格 dom节点，可加载事件
             createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.getTbl(rs, tname);
                 var _row = function (r, i) {
@@ -672,6 +689,8 @@
 
                 var len = rs.length;
                 var showFoot = false;
+                var showLabel=_.query("input[name='showLabel']").checked;
+                // console.log("showLabel",showLabel)
 
                 // console.log(options)
                 var orderby = options.orderby || ""
@@ -682,6 +701,7 @@
                         var prop = t.prop ? t.prop : t;
                         var seq = "";
                         var hide = !!t.hide;
+                        if(!showLabel) lable=prop;
                         //排序
                         if (prop === orderby.split(" ")[0]) {
                             seq = orderby.split(" ")[1] || "asc"
@@ -742,6 +762,7 @@
                 }
 
             },
+            //字符串拼接方式 生成表格
             grid: function (tname, rs, options) {
                 var tbl = this.tbls[tname];
                 var _row = function (r, i) {
@@ -765,9 +786,6 @@
                                         //保留1位并去掉多余0
                                         tfoot[colIndex] = parseFloat(tfoot[colIndex].toFixed(1))
                                     }
-                                    // return _.wrap("td", t,{
-                                    //     class:"number"
-                                    // });
                                     break;
                                 case "date":
                                     t = _.wrap("i", "", {
@@ -832,7 +850,7 @@
                         tablename: tname
                     });
             },
-            activeHd:function(tbl){
+            activeHd: function (tbl) {
                 var lis = _.queryAll(".slide .hd li")
                 lis.forEach(function (t) {
                     if (t.innerText === tbl) {
@@ -842,7 +860,30 @@
                     }
                 })
             },
-            //
+            //获取选中文本
+            getSelectedText: function (inputDom) {
+                if (document.selection) //IE
+                {
+                    return document.selection.createRange().text;
+                } else {
+                    return inputDom.value.substring(inputDom.selectionStart,
+                        inputDom.selectionEnd) || inputDom.value;
+                }
+            },
+            //设置高亮
+            setTextSelected: function (inputDom, startIndex, endIndex) {
+                if (inputDom.setSelectionRange) {
+                    inputDom.setSelectionRange(startIndex, endIndex);
+                } else if (inputDom.createTextRange) //IE 
+                {
+                    var range = inputDom.createTextRange();
+                    range.collapse(true);
+                    range.moveStart('character', startIndex);
+                    range.moveEnd('character', endIndex - startIndex - 1);
+                    range.select();
+                }
+                inputDom.focus();
+            },
             createSqlcmd: function () {
                 var textarea = _.createEle("textarea", "", {
                     cols: "100",
@@ -851,40 +892,57 @@
                 var btn = _.createEle("div", "执行sql", {
                     class: "btn exesql"
                 })
+
                 var _this = this;
                 _.addEvent("click", btn, function (e) {
-                    console.log(textarea.value)
-
                     var bd = document.querySelector(".slide .bd")
                     bd.innerHTML = "";
                     var options = {}
-                    var sql = textarea.value
+                    var sql = _this.getSelectedText(textarea) //textarea.value
                     sql.split(";").forEach(function (t) {
+                        //查询语句
+                        if ((/select\s.+from\s/i).test(t)) {
+                            var tname = ((t.match(/from\s(\S+)\s?/i) || [])[1] || "sqlcmd").toUpperCase();
+                            console.log(tname)
+                            _this.exe({
+                                sql: t,
+                                tbl: tname
+                            }, function (rs, tbl) {
+                                console.log(rs, tbl)
+                                bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, _.extend({
+                                    seq: true,
+                                    rowid: true,
+                                    check: true
+                                }, options))))
 
-                        var tname = ((t.match(/from\s(\S+)\s?/i) || [])[1] || "sqlcmd").toUpperCase();
-                        console.log(tname)
-                        _this.exe({
-                            sql: t,
-                            tbl: tname
-                        }, function (rs, tbl) {
-                            console.log(rs, tbl)
-                            bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, _.extend({
-                                seq: true,
-                                rowid: true,
-                                check: true
-                            }, options))))
+                                _this.activeHd(tbl)
+                            }, function (errormsg) {
+                                bd.appendChild(document.createTextNode(errormsg))
+                                _this.activeHd("")
 
-                            _this.activeHd(tbl)
-                        }, function (errormsg) {
-                            bd.appendChild(document.createTextNode(errormsg))
-                            _this.activeHd("")
+                            })
+                        } else {
+                            //非查询语句
+                            _this.exe({
+                                sql: t,
+                                tbl: ""
+                            }, function () {
 
-                        })
-
+                            }, function (errormsg) {
+                                bd.appendChild(document.createTextNode(errormsg))
+                            })
+                        }
                     })
-
                 })
-                return _.createEle("div", [textarea, btn], {
+                var checkbox = _.createCheckbox({
+                    label: "显示字段名",
+                    checked: true,
+                    name:"showLabel"
+                });
+                var btnGroup = _.createEle("div", [btn, checkbox], {
+                    class: "sqlcmd-btn-group"
+                })
+                return _.createEle("div", [textarea, btnGroup], {
                     class: "sqlcmd"
                 })
             }
