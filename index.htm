@@ -7,10 +7,23 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <link rel="stylesheet" href="index.css">
+    <style>
+    .tools{
+        display: flex;
+
+    }
+    .btn-group{
+        flex-direction: column
+    }
+    .btn-group .btn{
+        width:200px;
+
+    }
+    </style>
 </head>
 
 <body>
-   
+    <div class="tools"></div>
     <div class="demo"></div>
     <script src="websql.js"></script>
     <script>
@@ -237,16 +250,16 @@
             data: data,
         })
         console.log(ws)
+        var tools=document.querySelector(".tools")
+        tools.appendChild(ws.createBtns());
+        tools.appendChild(ws.createSqlcmd())
+       
         var demo=document.querySelector(".demo")
-        demo.appendChild(ws.createSqlcmd())
-        demo.appendChild(ws.createBtns());
+       
         demo.appendChild(ws.createSlide())
         
 
     </script>
-   
-
-    <!-- <textarea name="" id="" cols="30" rows="10"></textarea> -->
 </body>
 
 </html>

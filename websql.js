@@ -465,8 +465,8 @@
                     class: "hd"
                 })
 
-
-                var bd = _.createEle("div", '', {
+                //this.createSqlcmd()
+                var bd = _.createEle("div", "", {
                     class: "bd"
                 })
                 var container = _.createEle("div", [hd, bd], {
@@ -522,11 +522,9 @@
                                         check: true
                                     }, options), "tbody"), tbody)
 
-
-                                    _.query(".sqlcmd textarea").value = _this.sqls[tname] || ""
+                                    _this.setSqlcmd.call(_this,tname)
                                 });
                             }
-
                         }
                     } else {
                         var tr = _.closest(el, "tr")
@@ -613,8 +611,16 @@
                         check: true
                     }, options))))
 
-                    _.query(".sqlcmd textarea").value = _this.sqls[tname] || ""
+                   
+                    _this.setSqlcmd.call(_this,tname)
                 });
+            },
+            setSqlcmd:function(tname){
+                var sqlcmd= _.query(".sqlcmd textarea")
+                if(sqlcmd){
+                    sqlcmd.value = this.sqls[tname] || ""
+                }
+
             },
             //根据rs取得默认表结构
             getTbl: function (rs) {
@@ -834,7 +840,7 @@
             createSqlcmd: function () {
                 var textarea = _.createEle("textarea", "", {
                     cols: "100",
-                    rows: "10",
+                    rows: "5",
                 })
                 var btn = _.createEle("div", "执行sql", {
                     class: "btn exesql"
@@ -847,20 +853,28 @@
                     bd.innerHTML = "";
                     var options = {}
                     var sql=textarea.value
-                   var tname= sql.match(/from\s(.*?)\s/i)[1]||"sqlcmd";
+                   var tname= (sql.match(/from\s(.*?)\s/i)[1]||"sqlcmd").toUpperCase();
                    console.log(tname)
                     _this.exe({
                         sql: sql,
                         tbl: tname
                     }, function (rs, tbl) {
                         console.log(rs, tbl)
-
-
                         bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, _.extend({
                             seq: true,
                             rowid: true,
                             check: true
                         }, options))))
+
+
+                       var lis= _.queryAll(".slide .hd li")
+                       lis.forEach(function(t){
+                           if(t.innerText===tbl){
+                               t.setAttribute("active", "")
+                           }else{
+                               t.removeAttribute("active");
+                           }
+                       })
 
                     })
                 })
