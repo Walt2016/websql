@@ -195,7 +195,8 @@
                     case "string":
                     case "number":
                     case "date":
-                        ele.innerHTML += text;
+                        // ele.innerHTML += text;                        
+                        ele.appendChild(document.createTextNode(text));
                         break;
                     case "array":
                         text.forEach(function (t) {
@@ -376,29 +377,8 @@
                         tbl: t,
                         sql: `SELECT * FROM ${t} ${condition}`
                     }
-                    // return `SELECT * FROM ${t} ${condition}`
                 })
                 this.exe(sqls, callback)
-                // var store = function (tx, tbl) {
-                //     var sql = `SELECT * FROM ${tbl} ${condition}`;
-                //     console.log(sql)
-                //     _this.sqls[tbl] = sql;
-                //     _this.rs[tbl] = [];
-                //     _this.exe(sql, callback);
-                //     // tx.executeSql(sql, [], function (tx, results) {
-                //     //     console.log(results)
-                //     //     for (var i = 0; i < results.rows.length; i++) {
-                //     //         _this.rs[tbl].push(results.rows.item(i));
-                //     //     }
-                //     //     callback.call(_this, _this.rs[tbl], tbl);
-                //     // });
-                // }
-                // this.db.transaction(function (tx) {
-                //     console.log(tx)
-                //     tbls.forEach(function (tbl) {
-                //         store(tx, tbl)
-                //     });
-                // });
             },
             //执行sql
             exe: function (sql, callback) {
@@ -465,7 +445,6 @@
                     class: "hd"
                 })
 
-                //this.createSqlcmd()
                 var bd = _.createEle("div", "", {
                     class: "bd"
                 })
@@ -522,7 +501,7 @@
                                         check: true
                                     }, options), "tbody"), tbody)
 
-                                    _this.setSqlcmd.call(_this,tname)
+                                    _this.setSqlcmd.call(_this, tname)
                                 });
                             }
                         }
@@ -611,13 +590,13 @@
                         check: true
                     }, options))))
 
-                   
-                    _this.setSqlcmd.call(_this,tname)
+
+                    _this.setSqlcmd.call(_this, tname)
                 });
             },
-            setSqlcmd:function(tname){
-                var sqlcmd= _.query(".sqlcmd textarea")
-                if(sqlcmd){
+            setSqlcmd: function (tname) {
+                var sqlcmd = _.query(".sqlcmd textarea")
+                if (sqlcmd) {
                     sqlcmd.value = this.sqls[tname] || ""
                 }
 
@@ -637,6 +616,14 @@
             },
             createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.tbls[tname] || this.getTbl(rs);
+
+                tbl.forEach(function (t) {
+                    if (_.type(rs[0][t.prop]) === "undefined") {
+                        t.hide = true
+                    }
+                })
+
+                // var props=
                 var _row = function (r, i) {
                     var tag = "td",
                         arr = _.obj2arr(r),
@@ -690,13 +677,14 @@
                         var lable = t.label ? t.label : t;
                         var prop = t.prop ? t.prop : t;
                         var seq = "";
+                        var hide = !!t.hide;
                         //排序
                         if (prop === orderby.split(" ")[0]) {
                             seq = orderby.split(" ")[1] || "asc"
                         }
 
-                        typs.push(typ);
-                        return _.createEle("th", [_.createEle("div", lable, {
+                        if (!hide) typs.push(typ);
+                        return hide ? "" : _.createEle("th", [_.createEle("div", lable, {
                             class: "text"
                         }), _.createEle("div", "", {
                             class: "icon"
@@ -724,7 +712,7 @@
 
                 tfoot = tfoot.map(function (t) {
                     return _.createEle("td", t, {
-                        class: "number"
+                        class: t===""? "string":"number"
                     });
                 });
                 switch (resultType) {
@@ -852,31 +840,36 @@
                     var bd = document.querySelector(".slide .bd")
                     bd.innerHTML = "";
                     var options = {}
-                    var sql=textarea.value
-                   var tname= (sql.match(/from\s(.*?)\s/i)[1]||"sqlcmd").toUpperCase();
-                   console.log(tname)
-                    _this.exe({
-                        sql: sql,
-                        tbl: tname
-                    }, function (rs, tbl) {
-                        console.log(rs, tbl)
-                        bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, _.extend({
-                            seq: true,
-                            rowid: true,
-                            check: true
-                        }, options))))
+                    var sql = textarea.value
+                    sql.split(";").forEach(function (t) {
+
+                        var tname = (t.match(/from\s(.*?)\s/i)[1] || "sqlcmd").toUpperCase();
+                        console.log(tname)
+                        _this.exe({
+                            sql: t,
+                            tbl: tname
+                        }, function (rs, tbl) {
+                            console.log(rs, tbl)
+                            bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, _.extend({
+                                seq: true,
+                                rowid: true,
+                                check: true
+                            }, options))))
 
 
-                       var lis= _.queryAll(".slide .hd li")
-                       lis.forEach(function(t){
-                           if(t.innerText===tbl){
-                               t.setAttribute("active", "")
-                           }else{
-                               t.removeAttribute("active");
-                           }
-                       })
+                            var lis = _.queryAll(".slide .hd li")
+                            lis.forEach(function (t) {
+                                if (t.innerText === tbl) {
+                                    t.setAttribute("active", "")
+                                } else {
+                                    t.removeAttribute("active");
+                                }
+                            })
+
+                        })
 
                     })
+
                 })
                 return _.createEle("div", [textarea, btn], {
                     class: "sqlcmd"
