@@ -609,13 +609,28 @@
                         rowid: true,
                         check: true
                     }, options))))
-                    _this.setSqlcmd.call(_this, tname)
+
+                    if(tbls.length===1){
+                        _this.setSqlcmd.call(_this, tname)
+                    }else{
+                        _this.setSqlcmd.call(_this, tbls)
+                    }
+                   
+                    //
                 });
             },
             setSqlcmd: function (tname) {
                 var sqlcmd = _.query(".sqlcmd textarea")
+                var _this=this;
                 if (sqlcmd) {
-                    sqlcmd.value = this.sqls[tname] || ""
+                    if(_.type(tname)==="array"){
+                        sqlcmd.value=tname.map(function(t){
+                            return _this.sqls[t] || ""
+                        }).join(";\n")
+                    }else{
+                        sqlcmd.value = _this.sqls[tname] || ""
+                    }
+                    
                 }
 
             },
@@ -886,7 +901,7 @@
             },
             createSqlcmd: function () {
                 var textarea = _.createEle("textarea", "", {
-                    cols: "100",
+                    cols: "80",
                     rows: "5",
                 })
                 var btn = _.createEle("div", "执行sql", {
@@ -901,7 +916,7 @@
                     var sql = _this.getSelectedText(textarea) //textarea.value
                     sql.split(";").forEach(function (t) {
                         //查询语句
-                        if ((/select\s.+from\s/i).test(t)) {
+                        if ((/select\s[\s\S]+from\s/i).test(t)) {
                             var tname = ((t.match(/from\s(\S+)\s?/i) || [])[1] || "sqlcmd").toUpperCase();
                             console.log(tname)
                             _this.exe({
@@ -927,6 +942,7 @@
                                 sql: t,
                                 tbl: ""
                             }, function () {
+                                console.log("ok")
 
                             }, function (errormsg) {
                                 bd.appendChild(document.createTextNode(errormsg))
@@ -935,7 +951,7 @@
                     })
                 })
                 var checkbox = _.createCheckbox({
-                    label: "显示字段名",
+                    label: "显示字段别名",
                     checked: true,
                     name:"showLabel"
                 });
