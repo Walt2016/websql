@@ -274,7 +274,12 @@
                     label: "合计数字列",
                     checked: true,
                     name: "showStatistic"
-                }
+                },
+                // {
+                //     label: "允许多表查询",
+                //     checked: true,
+                //     name: "showMultisql"
+                // }
             ]
         }
 
@@ -313,7 +318,6 @@
                         var vs = flds.map(function (t) {
                             return r[t]
                         });
-                        // tx.executeSql(sql, vs);
                         tx.executeSql(sql, vs, function (tx, result) {
                             console.log("insert ok")
                             console.log(tx, result)
@@ -473,11 +477,9 @@
             },
             createSlide: function () {
                 var _this = this;
-
                 var hd = _.createEle("div", this.createHd(), {
                     class: "hd"
                 })
-
                 var bd = _.createEle("div", "", {
                     class: "bd"
                 })
@@ -488,14 +490,24 @@
                     var el = e.target;
                     console.log(el)
                     var li = _.closest(el, "li")
+                    var config = _this.getGridConfig();
 
                     if (li) {
-                        var oldLi = _.query(".slide .hd li[active]")
-                        oldLi && oldLi.removeAttribute("active");
-                        li.setAttribute("active", "")
                         var tname = li.innerText;
-                        console.log(tname)
-                        _this.createList([tname])
+                        if (!config.multisql) {
+                            _this.toggleHd(tname)
+                            var actLis = _.queryAll(".slide .hd li[active]")
+                            if (actLis) {
+                                var tbls = []
+                                actLis.forEach(function (t) {
+                                    tbls.push(t.innerText);
+                                })
+                                _this.createList(tbls)
+                            }
+                        } else {
+                            _this.createList([tname])
+                            _this.activeHd(tname)
+                        }
                     }
                 })
                 _.addEvent("click", bd, function (e) {
@@ -542,7 +554,6 @@
                         })
                         tr.setAttribute("active", "");
                     }
-
                 })
                 return _.createEle("div", container, {
                     class: "slide"
@@ -662,7 +673,7 @@
             //生成表格 dom节点，可加载事件
             createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.getTbl(rs, tname);
-                var config=_.extend(this.getGridConfig(),options)
+                var config = _.extend(this.getGridConfig(), options)
 
                 var _row = function (r, i) {
                     var tag = "td",
@@ -869,11 +880,20 @@
             },
             activeHd: function (tbl) {
                 var lis = _.queryAll(".slide .hd li")
+                var tbls = _.type(tbl) === "array" ? tbl : [tbl];
                 lis.forEach(function (t) {
-                    if (t.innerText === tbl) {
+                    if (tbls.indexOf(t.innerText) >= 0) {
                         t.setAttribute("active", "")
                     } else {
                         t.removeAttribute("active");
+                    }
+                })
+            },
+            toggleHd: function (tbl) {
+                var lis = _.queryAll(".slide .hd li")
+                lis.forEach(function (t) {
+                    if (t.innerText === tbl) {
+                        t.hasAttribute("active") ? t.removeAttribute("active") : t.setAttribute("active", "")
                     }
                 })
             },
@@ -916,10 +936,11 @@
                     bd.innerHTML = "";
                     var options = {}
                     var sql = _this.getSelectedText(textarea) //textarea.value
-                    if(!sql) {
-                        bd.innerHTML="请输入sql" 
+                    if (!sql) {
+                        bd.innerHTML = "请输入sql"
                         return;
                     }
+                    var tnames=[];
                     sql.split(";").forEach(function (t) {
                         //查询语句
                         if ((/select\s[\s\S]+from\s/i).test(t)) {
@@ -932,11 +953,12 @@
                                 console.log(rs, tbl)
                                 bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, options)))
 
-                                _this.activeHd(tbl)
+                                // _this.activeHd(tbl)
+                                tnames.push(tname)
+                                _this.activeHd(tnames)
                             }, function (errormsg) {
                                 bd.appendChild(document.createTextNode(errormsg))
                                 _this.activeHd("")
-
                             })
                         } else {
                             //非查询语句
@@ -951,6 +973,7 @@
                             })
                         }
                     })
+                    
                 });
 
                 var checkboxs = this.gridConfig.map(function (t) {
@@ -967,7 +990,7 @@
             //
             getGridConfig: function () {
                 var config = {}
-                 this.gridConfig.forEach(function (t) {
+                this.gridConfig.forEach(function (t) {
                     var val = _.query("input[name='" + t.name + "']").checked
                     var key = t.name.substring(4).toLowerCase();
                     config[key] = val

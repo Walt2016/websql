@@ -288,7 +288,9 @@ a {
     display: flex;
     margin-left: 10px;
 }
-
+.sqlcmd-btn-group{
+    margin-left:10px;
+}
 .sqlcmd-btn-group>div {
     margin-bottom: 10px;
 }
