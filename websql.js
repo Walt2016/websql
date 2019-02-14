@@ -217,13 +217,6 @@
             return ele;
         },
         createCheckbox: function (options) {
-            // var opt={
-            //     type: "checkbox",
-            // }
-            // if(options&&options.checked){
-            //     opt.checked=true;
-            // }
-
             var checkbox = _.createEle("input", "", _.extend({
                 type: "checkbox",
             }, options))
@@ -235,7 +228,6 @@
             } else {
                 return checkbox
             }
-
         }
     }
 
@@ -263,6 +255,27 @@
             //所有数据
             this.rs = [];
             this.sqls = {};
+
+            this.gridConfig = [{
+                    label: "显示字段别名",
+                    checked: true,
+                    name: "showLabel"
+                }, {
+                    label: "显示序号列",
+                    checked: true,
+                    name: "showSeq"
+                },
+                {
+                    label: "显示选择列",
+                    checked: true,
+                    name: "showCheck"
+                },
+                {
+                    label: "合计数字列",
+                    checked: true,
+                    name: "showStatistic"
+                }
+            ]
         }
 
         return _.createClass(Websql, {
@@ -486,9 +499,9 @@
                     }
                 })
                 _.addEvent("click", bd, function (e) {
-                    var el = e.target
-                    var thead = _.closest(el, "thead")
-                    var table = _.closest(el, "table")
+                    var el = e.target,
+                        thead = _.closest(el, "thead"),
+                        table = _.closest(el, "table");
 
                     if (thead) {
                         var tbody = thead.nextSibling;
@@ -515,11 +528,7 @@
                                     orderby: prop + " " + seq
                                 }
                                 _this.list([tname], options || {}, function (rs, tname) {
-                                    tbody.parentNode.replaceChild(_this.createGrid(tname, rs, _.extend({
-                                        seq: true,
-                                        rowid: true,
-                                        check: true
-                                    }, options), "tbody"), tbody)
+                                    tbody.parentNode.replaceChild(_this.createGrid(tname, rs, options, "tbody"), tbody)
 
                                     _this.setSqlcmd.call(_this, tname)
                                 });
@@ -582,7 +591,7 @@
                             _this.del("SSF_ORDER_DETAILS", 1);
                             break;
                         default:
-                            _this[act]()
+                            act && _this[act] && _this[act]();
                     }
                 })
 
@@ -604,36 +613,30 @@
                 var tbls = tbls || []
                 bd.innerHTML = "";
                 _this.list(tbls, options || {}, function (rs, tname) {
-                    bd.appendChild(_.createEle("li", _this.createGrid(tname, rs, _.extend({
-                        seq: true,
-                        rowid: true,
-                        check: true
-                    }, options))))
+                    bd.appendChild(_.createEle("li", _this.createGrid(tname, rs, options)))
 
-                    if(tbls.length===1){
+                    if (tbls.length === 1) {
                         _this.setSqlcmd.call(_this, tname)
-                    }else{
+                    } else {
                         _this.setSqlcmd.call(_this, tbls)
                     }
-                   
-                    //
                 });
             },
             setSqlcmd: function (tname) {
                 var sqlcmd = _.query(".sqlcmd textarea")
-                var _this=this;
+                var _this = this;
                 if (sqlcmd) {
-                    if(_.type(tname)==="array"){
-                        sqlcmd.value=tname.map(function(t){
+                    if (_.type(tname) === "array") {
+                        sqlcmd.value = tname.map(function (t) {
                             return _this.sqls[t] || ""
                         }).join(";\n")
-                    }else{
+                    } else {
                         sqlcmd.value = _this.sqls[tname] || ""
                     }
-                    
-                }
 
+                }
             },
+
             //根据rs取得默认表结构
             getTbl: function (rs, tname) {
                 var arr = _.obj2arr(rs[0]),
@@ -659,6 +662,8 @@
             //生成表格 dom节点，可加载事件
             createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.getTbl(rs, tname);
+                var config=_.extend(this.getGridConfig(),options)
+
                 var _row = function (r, i) {
                     var tag = "td",
                         arr = _.obj2arr(r),
@@ -688,8 +693,8 @@
                             class: typs[j]
                         });
                     });
-                    if (options.seq) cell.unshift(_.createEle(tag, i === 0 ? "#" : i));
-                    if (options.check) cell.unshift(_.createEle(tag, _.createCheckbox()));
+                    if (config.seq) cell.unshift(_.createEle(tag, i === 0 ? "#" : i));
+                    if (config.check) cell.unshift(_.createEle(tag, _.createCheckbox()));
 
 
                     return _.createEle("tr", cell, {
@@ -699,16 +704,13 @@
                 //类型
                 var typs = [];
                 var offset = 0;
-                if (options.check) offset++;
-                if (options.seq) offset++;
+                if (config.check) offset++;
+                if (config.seq) offset++;
 
                 var len = rs.length;
                 var showFoot = false;
-                var showLabel=_.query("input[name='showLabel']").checked;
-                // console.log("showLabel",showLabel)
 
-                // console.log(options)
-                var orderby = options.orderby || ""
+                var orderby = config.orderby || ""
                 var thead =
                     tbl.map(function (t) {
                         var typ = t.type ? t.type : "string";
@@ -716,7 +718,7 @@
                         var prop = t.prop ? t.prop : t;
                         var seq = "";
                         var hide = !!t.hide;
-                        if(!showLabel) lable=prop;
+                        if (!config.label) lable = prop;
                         //排序
                         if (prop === orderby.split(" ")[0]) {
                             seq = orderby.split(" ")[1] || "asc"
@@ -724,7 +726,7 @@
 
 
                         if (!hide) {
-                            if (typ === "number") showFoot = true;
+                            if (typ === "number" && config.statistic) showFoot = true;
                             typs.push(typ);
                         }
                         return hide ? "" : _.createEle("th", [_.createEle("div", lable, {
@@ -738,8 +740,8 @@
                         });
                     });
 
-                if (options.seq) thead.unshift(_.createEle("th", "#"));
-                if (options.check) thead.unshift(_.createEle("th", _.createCheckbox()));
+                if (config.seq) thead.unshift(_.createEle("th", "#"));
+                if (config.check) thead.unshift(_.createEle("th", _.createCheckbox()));
 
 
                 var tfoot = new Array(offset).fill("").concat(typs).map(function (t, i) {
@@ -914,6 +916,10 @@
                     bd.innerHTML = "";
                     var options = {}
                     var sql = _this.getSelectedText(textarea) //textarea.value
+                    if(!sql) {
+                        bd.innerHTML="请输入sql" 
+                        return;
+                    }
                     sql.split(";").forEach(function (t) {
                         //查询语句
                         if ((/select\s[\s\S]+from\s/i).test(t)) {
@@ -924,11 +930,7 @@
                                 tbl: tname
                             }, function (rs, tbl) {
                                 console.log(rs, tbl)
-                                bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, _.extend({
-                                    seq: true,
-                                    rowid: true,
-                                    check: true
-                                }, options))))
+                                bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, options)))
 
                                 _this.activeHd(tbl)
                             }, function (errormsg) {
@@ -949,18 +951,28 @@
                             })
                         }
                     })
-                })
-                var checkbox = _.createCheckbox({
-                    label: "显示字段别名",
-                    checked: true,
-                    name:"showLabel"
                 });
-                var btnGroup = _.createEle("div", [btn, checkbox], {
+
+                var checkboxs = this.gridConfig.map(function (t) {
+                    return _.createCheckbox(t)
+                })
+
+                var btnGroup = _.createEle("div", [btn].concat(checkboxs), {
                     class: "sqlcmd-btn-group"
                 })
                 return _.createEle("div", [textarea, btnGroup], {
                     class: "sqlcmd"
                 })
+            },
+            //
+            getGridConfig: function () {
+                var config = {}
+                 this.gridConfig.forEach(function (t) {
+                    var val = _.query("input[name='" + t.name + "']").checked
+                    var key = t.name.substring(4).toLowerCase();
+                    config[key] = val
+                })
+                return config
             }
         })
     }();
