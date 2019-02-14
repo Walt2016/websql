@@ -636,11 +636,12 @@
             setSqlcmd: function (tname) {
                 var sqlcmd = _.query(".sqlcmd textarea")
                 var _this = this;
-                var tbls = []
-                _.queryAll(".dataintable ").forEach(function (t) {
-                    tbls.push(t.getAttribute("tablename"))
-                })
+
                 if (sqlcmd) {
+                    var tbls = []
+                    _.queryAll(".dataintable ").forEach(function (t) {
+                        tbls.push(t.getAttribute("tablename"))
+                    })
                     sqlcmd.value = tbls.map(function (t) {
                         return (_this.sqls[t] || "").trim()
                     }).join(";\n")
