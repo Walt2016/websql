@@ -636,14 +636,21 @@
             setSqlcmd: function (tname) {
                 var sqlcmd = _.query(".sqlcmd textarea")
                 var _this = this;
+                var tbls = []
+                _.queryAll(".dataintable ").forEach(function (t) {
+                    tbls.push(t.getAttribute("tablename"))
+                })
                 if (sqlcmd) {
-                    if (_.type(tname) === "array") {
-                        sqlcmd.value = tname.map(function (t) {
-                            return _this.sqls[t] || ""
-                        }).join(";\n")
-                    } else {
-                        sqlcmd.value = _this.sqls[tname] || ""
-                    }
+                    sqlcmd.value = tbls.map(function (t) {
+                        return (_this.sqls[t] || "").trim()
+                    }).join(";\n")
+                    // if (_.type(tname) === "array") {
+                    //     sqlcmd.value = tname.map(function (t) {
+                    //         return _this.sqls[t] || ""
+                    //     }).join(";\n")
+                    // } else {
+                    //     sqlcmd.value = _this.sqls[tname] || ""
+                    // }
 
                 }
             },
@@ -940,7 +947,7 @@
                         bd.innerHTML = "请输入sql"
                         return;
                     }
-                    var tnames=[];
+                    var tnames = [];
                     sql.split(";").forEach(function (t) {
                         //查询语句
                         if ((/select\s[\s\S]+from\s/i).test(t)) {
@@ -973,7 +980,7 @@
                             })
                         }
                     })
-                    
+
                 });
 
                 var checkboxs = this.gridConfig.map(function (t) {
