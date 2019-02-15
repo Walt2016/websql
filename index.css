@@ -297,6 +297,8 @@ a {
     border: 1px solid #3F3F3F;
     width: 500px;
     height: 200px;
+    overflow-y: auto;
+    -webkit-user-modify: read-write-plaintext-only;
 }
 
 .sqlcmd .textarea::before {
