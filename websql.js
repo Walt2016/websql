@@ -653,13 +653,13 @@
                         sqlcmd.value = tbls.map(function (t) {
                             return (_this.sqls[t] || "").trim()
                         }).join(";\n")
-                    } else {//
-                       var keys= ["select","from","where","desc","asc","order by","group by","left join","right join","inner join"];
-                      var keyReg= new RegExp("("+keys.join("|")+")", "gi");
+                    } else { //
+                        var keys = ["select", "from", "where", "desc", "asc", "order by", "group by", "left join", "right join", "inner join"];
+                        var keyReg = new RegExp("(" + keys.join("|") + ")", "gi");
                         sqlcmd.innerHTML = tbls.map(function (t) {
-                            return (_this.sqls[t] || "").trim().replace(keyReg,function(t){
-                                return _.wrap("font",t,{
-                                    class:"red"
+                            return (_this.sqls[t] || "").trim().replace(keyReg, function (t) {
+                                return _.wrap("font", t, {
+                                    class: "red"
                                 })
                             })
                         }).join(";<br>")
