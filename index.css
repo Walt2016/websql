@@ -288,9 +288,27 @@ a {
     display: flex;
     margin-left: 10px;
 }
-.sqlcmd-btn-group{
-    margin-left:10px;
+
+.sqlcmd .red{
+    color: red;
 }
+
+.sqlcmd .textarea {
+    border: 1px solid #3F3F3F;
+    width: 500px;
+    height: 200px;
+}
+
+.sqlcmd .textarea::before {
+    content: attr(placeholder);
+    display: block;
+    color: #adadad;
+}
+
+.sqlcmd-btn-group {
+    margin-left: 10px;
+}
+
 .sqlcmd-btn-group>div {
     margin-bottom: 10px;
 }

@@ -221,15 +221,21 @@
                 type: "checkbox",
             }, options))
             if (options) {
-                var label = _.createEle("div", options.label)
-                return _.createEle("div", [checkbox, label], {
+                var label = _.div(options.label)
+                return _.div([checkbox, label], {
                     class: "input-group"
                 });
             } else {
                 return checkbox
             }
         }
-    }
+    };
+    ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i"].forEach(function (t) {
+        _[t] = function (text, options) {
+            return _.createEle(t, text, options)
+        }
+    });
+
 
     var _websql = function () {
         var Websql = function (options) {
@@ -320,11 +326,11 @@
                         });
                         tx.executeSql(sql, vs, function (tx, result) {
                             console.log("insert ok")
-                            console.log(tx, result)
+                            // console.log(tx, result)
 
                         }, function (tx, error) {
                             console.log("insert fail")
-                            console.log(error.message)
+                            // console.log(error.message)
                             // throw new Error(error);
                             _this.errorCall && _this.errorCall(error.message)
 
@@ -400,11 +406,12 @@
 
                 var tbls = tbls || [];
                 var _this = this;
-                if (tbls.length === 0) {
-                    for (var tbl in _this.tbls) {
-                        tbls.push(tbl)
-                    }
-                }
+                // if (tbls.length === 0) {
+                //     return
+                //     // for (var tbl in _this.tbls) {
+                //     //     tbls.push(tbl)
+                //     // }
+                // }
 
                 var sqls = tbls.map(t => {
                     return {
@@ -418,14 +425,18 @@
             exe: function (sql, callback, errorCall) {
                 var _this = this;
                 var store = function (tx, sql, tbl) {
-                    console.log(sql)
+                    // console.log(sql)
+
+                    console.time(sql);
                     tx.executeSql(sql, [], function (tx, results) {
-                        console.log(results)
+                        // console.log(results)
                         _this.sqls[tbl] = sql;
                         _this.rs[tbl] = [];
                         for (var i = 0; i < results.rows.length; i++) {
                             _this.rs[tbl].push(results.rows.item(i));
                         }
+                        console.timeEnd(sql);
+
                         callback && callback.call(_this, _this.rs[tbl], tbl);
                     }, function (tx, error) {
                         // console.error(  error.message);
@@ -444,7 +455,6 @@
                     }
 
                 })
-
             },
             //表名导航
             hd: function () {
@@ -467,9 +477,9 @@
                 for (var tbl in _this.tbls) {
                     tbls.push(tbl)
                 }
-                return _.createEle("ul", tbls.map(function (t) {
-                    return _.createEle("li", [_.createEle("i", ""),
-                        _.createEle("div", t, {
+                return _.ul(tbls.map(function (t) {
+                    return _.li([_.i(""),
+                        _.div(t, {
                             class: "text"
                         })
                     ])
@@ -477,13 +487,13 @@
             },
             createSlide: function () {
                 var _this = this;
-                var hd = _.createEle("div", this.createHd(), {
+                var hd = _.div(this.createHd(), {
                     class: "hd"
                 })
-                var bd = _.createEle("div", "", {
+                var bd = _.div("", {
                     class: "bd"
                 })
-                var container = _.createEle("div", [hd, bd], {
+                var container = _.div([hd, bd], {
                     class: "slide_container"
                 })
                 _.addEvent("click", hd, function (e) {
@@ -555,7 +565,7 @@
                         tr.setAttribute("active", "");
                     }
                 })
-                return _.createEle("div", container, {
+                return _.div(container, {
                     class: "slide"
                 })
             },
@@ -573,11 +583,11 @@
                     key: "list",
                     val: "列表"
                 }].map((t) => {
-                    return _.createEle("div", t.val, {
+                    return _.div(t.val, {
                         class: "btn " + t.key
                     })
                 })
-                var btnGroup = _.createEle("div", btns, {
+                var btnGroup = _.div(btns, {
                     class: "btn-group"
                 })
                 var _this = this;
@@ -587,7 +597,11 @@
                     console.log(e.target, act)
                     switch (act) {
                         case "list":
-                            _this.createList();
+                            var tbls = [];
+                            for (var tbl in _this.tbls) {
+                                tbls.push(tbl)
+                            }
+                            _this.createList(tbls);
                             break;
                         case "add":
                             for (var tbl in data) {
@@ -624,27 +638,35 @@
                 var tbls = tbls || []
                 bd.innerHTML = "";
                 _this.list(tbls, options || {}, function (rs, tname) {
-                    bd.appendChild(_.createEle("li", _this.createGrid(tname, rs, options)))
-
-                    if (tbls.length === 1) {
-                        _this.setSqlcmd.call(_this, tname)
-                    } else {
-                        _this.setSqlcmd.call(_this, tbls)
-                    }
+                    bd.appendChild(_.li(_this.createGrid(tname, rs, options)))
+                    _this.setSqlcmd.call(_this)
                 });
             },
+
             setSqlcmd: function (tname) {
-                var sqlcmd = _.query(".sqlcmd textarea")
+                var sqlcmd = _.query(".sqlcmd .textarea")
                 var _this = this;
 
                 if (sqlcmd) {
-                    var tbls = []
-                    _.queryAll(".dataintable ").forEach(function (t) {
-                        tbls.push(t.getAttribute("tablename"))
-                    })
-                    sqlcmd.value = tbls.map(function (t) {
-                        return (_this.sqls[t] || "").trim()
-                    }).join(";\n")
+                    var tbls = this.getTbls()
+                    if (sqlcmd.tagName.toLowerCase() === "textarea") {
+                        sqlcmd.value = tbls.map(function (t) {
+                            return (_this.sqls[t] || "").trim()
+                        }).join(";\n")
+                    } else {//
+                       var keys= ["select","from","where","desc","asc","order by","group by","left join","right join","inner join"];
+                      var keyReg= new RegExp("("+keys.join("|")+")", "gi");
+                        sqlcmd.innerHTML = tbls.map(function (t) {
+                            return (_this.sqls[t] || "").trim().replace(keyReg,function(t){
+                                return _.wrap("font",t,{
+                                    class:"red"
+                                })
+                            })
+                        }).join(";<br>")
+                    }
+
+
+                    this.activeHd(tbls)
                     // if (_.type(tname) === "array") {
                     //     sqlcmd.value = tname.map(function (t) {
                     //         return _this.sqls[t] || ""
@@ -655,13 +677,19 @@
 
                 }
             },
-
+            getTbls: function () {
+                var tbls = []
+                _.queryAll(".dataintable").forEach(function (t) {
+                    tbls.push(t.getAttribute("tablename"))
+                })
+                return tbls
+            },
             //根据rs取得默认表结构
             getTbl: function (rs, tname) {
                 var arr = _.obj2arr(rs[0]),
                     keys = arr.keys,
                     typs = arr.typs;
-                var tbl = this.tbls[tname] || [];
+                var tbl = this.tbls[tname.trim()] || [];
                 return keys.map(function (t, i) {
                     var fld = tbl.filter(function (f) {
                         return f.prop === t
@@ -684,8 +712,7 @@
                 var config = _.extend(this.getGridConfig(), options)
 
                 var _row = function (r, i) {
-                    var tag = "td",
-                        arr = _.obj2arr(r),
+                    var arr = _.obj2arr(r),
                         vals = arr.vals;
                     var cell = vals.map(function (t, j) {
                         //计算
@@ -708,15 +735,15 @@
                                 }), t]
                                 break;
                         }
-                        return _.createEle("td", t, {
+                        return _.td(t, {
                             class: typs[j]
                         });
                     });
-                    if (config.seq) cell.unshift(_.createEle(tag, i === 0 ? "#" : i));
-                    if (config.check) cell.unshift(_.createEle(tag, _.createCheckbox()));
+                    if (config.seq) cell.unshift(_.td(i === 0 ? "#" : i));
+                    if (config.check) cell.unshift(_.td(_.createCheckbox()));
 
 
-                    return _.createEle("tr", cell, {
+                    return _.tr(cell, {
                         rowid: i
                     })
                 }
@@ -748,9 +775,9 @@
                             if (typ === "number" && config.statistic) showFoot = true;
                             typs.push(typ);
                         }
-                        return hide ? "" : _.createEle("th", [_.createEle("div", lable, {
+                        return hide ? "" : _.th([_.div(lable, {
                             class: "text"
-                        }), _.createEle("div", "", {
+                        }), _.div("", {
                             class: "icon"
                         })], {
                             class: typ,
@@ -759,10 +786,8 @@
                         });
                     });
 
-                if (config.seq) thead.unshift(_.createEle("th", "#"));
-                if (config.check) thead.unshift(_.createEle("th", _.createCheckbox()));
-
-
+                if (config.seq) thead.unshift(_.th("#"));
+                if (config.check) thead.unshift(_.th(_.createCheckbox()));
                 var tfoot = new Array(offset).fill("").concat(typs).map(function (t, i) {
                     return i === 0 ? "合计" : t === "number" ? 0 : "";
                 });
@@ -775,23 +800,23 @@
                     });
 
                 tfoot = showFoot ? tfoot.map(function (t) {
-                    return _.createEle("td", t, {
+                    return _.td(t, {
                         class: t === "" ? "string" : "number"
                     });
                 }) : "";
                 switch (resultType) {
                     case "thead":
-                        return _.createEle("thead", thead);
+                        return _.thead(thead);
                         break;
                     case "tbody":
-                        return _.createEle("tbody", tbody);
+                        return _.tbody(tbody);
                         break;
                     case "tfoot":
-                        return _.createEle("tfoot", tfoot);
+                        return _.tfoot(tfoot);
                         break;
                     default:
                         return _.createEle("table",
-                            [_.createEle("thead", thead), _.createEle("tbody", tbody), _.createEle("tfoot", tfoot)], {
+                            [_.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
                                 class: "dataintable",
                                 tablename: tname
                             });
@@ -911,8 +936,24 @@
                 {
                     return document.selection.createRange().text;
                 } else {
-                    return inputDom.value.substring(inputDom.selectionStart,
-                        inputDom.selectionEnd) || inputDom.value;
+                    var val = "";
+                    if (inputDom.tagName.toLowerCase() === "textarea") {
+                        val = inputDom.value
+                    } else {
+                        val = inputDom.innerText
+                        //由于contenteditable属性产生的换行机制问题
+                        //纯文本模式下，会加Unicode等于10和160的2位字符，
+                        val = val.replace(/[\u000A|\u00A0]/g, function (t) {
+                            return " "
+                        })
+                    }
+
+                    // for(var i=0 ;i<sql.length;i++){
+                    //     console.log(sql[i]+":"+sql.charCodeAt(i))
+                    // }
+
+                    return val.substring(inputDom.selectionStart,
+                        inputDom.selectionEnd) || val;
                 }
             },
             //设置高亮
@@ -930,11 +971,17 @@
                 inputDom.focus();
             },
             createSqlcmd: function () {
-                var textarea = _.createEle("textarea", "", {
-                    cols: "80",
-                    rows: "5",
+                // var textarea = _.textarea("", {
+                //     cols: "80",
+                //     rows: "5",
+                // })
+                var textarea = _.div("", {
+                    contentEditable: true,
+                    class: "textarea",
+                    // placeholder:"这里输入sql"
                 })
-                var btn = _.createEle("div", "执行sql", {
+
+                var btn = _.div("执行sql", {
                     class: "btn exesql"
                 })
 
@@ -948,20 +995,19 @@
                         bd.innerHTML = "请输入sql"
                         return;
                     }
+
+
                     var tnames = [];
                     sql.split(";").forEach(function (t) {
                         //查询语句
                         if ((/select\s[\s\S]+from\s/i).test(t)) {
                             var tname = ((t.match(/from\s(\S+)\s?/i) || [])[1] || "sqlcmd").toUpperCase();
-                            console.log(tname)
+                            // console.log(tname)
                             _this.exe({
                                 sql: t,
                                 tbl: tname
                             }, function (rs, tbl) {
-                                console.log(rs, tbl)
-                                bd.appendChild(_.createEle("li", _this.createGrid(tbl, rs, options)))
-
-                                // _this.activeHd(tbl)
+                                bd.appendChild(_.li(_this.createGrid(tbl, rs, options)))
                                 tnames.push(tname)
                                 _this.activeHd(tnames)
                             }, function (errormsg) {
@@ -983,15 +1029,13 @@
                     })
 
                 });
-
                 var checkboxs = this.gridConfig.map(function (t) {
                     return _.createCheckbox(t)
                 })
-
-                var btnGroup = _.createEle("div", [btn].concat(checkboxs), {
+                var btnGroup = _.div([btn].concat(checkboxs), {
                     class: "sqlcmd-btn-group"
                 })
-                return _.createEle("div", [textarea, btnGroup], {
+                return _.div([textarea, btnGroup], {
                     class: "sqlcmd"
                 })
             },
@@ -1007,7 +1051,6 @@
             }
         })
     }();
-
     if (!window.openDatabase) {
         alert("当前环境不支持websql！");
         return;
