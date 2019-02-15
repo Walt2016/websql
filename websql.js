@@ -653,7 +653,7 @@
                         sqlcmd.value = tbls.map(function (t) {
                             return (_this.sqls[t] || "").trim()
                         }).join(";\n")
-                    } else { //
+                    } else { //sql关键字高亮
                         var keys = ["select", "from", "where", "desc", "asc", "order by", "group by", "left join", "right join", "inner join"];
                         var keyReg = new RegExp("(" + keys.join("|") + ")", "gi");
                         sqlcmd.innerHTML = tbls.map(function (t) {
