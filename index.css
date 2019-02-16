@@ -292,6 +292,9 @@ a {
 .sqlcmd .red{
     color: red;
 }
+.sqlcmd .blue{
+    color: blue;
+}
 
 .sqlcmd .textarea {
     border: 1px solid #3F3F3F;

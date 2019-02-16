@@ -228,6 +228,12 @@
             } else {
                 return checkbox
             }
+        },
+        stringify: function (el) {
+            var str = el.tagName.toLowerCase();
+            str += el.id ? "#" + el.id : "";
+            str += el.className ? "." + el.className.replace(/\s+/g, ".") : "";
+            return str;
         }
     };
     ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i"].forEach(function (t) {
@@ -235,6 +241,15 @@
             return _.createEle(t, text, options)
         }
     });
+
+    var _log = console.log
+    console.log = function () {
+        if (_.type(arguments[0]) === "HTMLDivElement".toLowerCase()) {
+            _log.call(console, _.stringify(arguments[0]), 'color:blue')
+        } else {
+            _log.call(console, [].slice.call(arguments).join(" "))
+        }
+    }
 
 
     var _websql = function () {
@@ -634,6 +649,7 @@
             //代替showList  创建el方式替代字符串拼接
             createList: function (tbls, options) {
                 var bd = document.querySelector(".slide .bd")
+                console.log(bd)
                 var _this = this;
                 var tbls = tbls || []
                 bd.innerHTML = "";
@@ -642,7 +658,18 @@
                     _this.setSqlcmd.call(_this)
                 });
             },
-
+            //sql关键字高亮
+            hightlightSql: function (sql) {
+                var keys=["select", "from", "where", "desc", "asc",  "on","delete","values","if","not","EXISTS",
+                "insert\\s+into","create\\s+table",
+                "order\\s+by", "group\s+by", "left\\s+join", "right\\s+join", "inner\\s+join"]
+                var reg1 = new RegExp("(" + keys.join("|") + ")", "gi");
+                return sql.replace(reg1, function (t) {
+                    return _.wrap("font", (t.toUpperCase()).replace(/\s+/," "), {
+                        class: "red"
+                    })
+                }).replace(/;\s*/g, ";<br>")
+            },
             setSqlcmd: function (tname) {
                 var sqlcmd = _.query(".sqlcmd .textarea")
                 var _this = this;
@@ -654,28 +681,15 @@
                             return (_this.sqls[t] || "").trim()
                         }).join(";\n")
                     } else { //contenteditable
-                        //sql关键字高亮
-                        var keys = ["select", "from", "where", "desc", "asc", "order by", "group by", "left join", "right join", "inner join"];
-                        var keyReg = new RegExp("(" + keys.join("|") + ")", "gi");
-                        sqlcmd.innerHTML = tbls.map(function (t) {
-                            return (_this.sqls[t] || "").trim().replace(keyReg, function (t) {
-                                return _.wrap("font", t, {
-                                    class: "red"
-                                })
-                            })
-                        }).join(";<br>")
+                        // sqlcmd.innerHTML = tbls.map(function (t) {
+                        //     return _this.hightlightSql((_this.sqls[t] || "").trim())
+                        // }).join(";<br>")
+
+                        sqlcmd.innerHTML = _this.hightlightSql(tbls.map(function (t) {
+                            return (_this.sqls[t] || "").trim()
+                        }).join(";"))
                     }
-
-
                     this.activeHd(tbls)
-                    // if (_.type(tname) === "array") {
-                    //     sqlcmd.value = tname.map(function (t) {
-                    //         return _this.sqls[t] || ""
-                    //     }).join(";\n")
-                    // } else {
-                    //     sqlcmd.value = _this.sqls[tname] || ""
-                    // }
-
                 }
             },
             getTbls: function () {
@@ -937,25 +951,31 @@
                 {
                     return document.selection.createRange().text;
                 } else {
-                    var val = "";
-                    if (inputDom.tagName.toLowerCase() === "textarea") {
-                        val = inputDom.value
-                    } else {
-                        val = inputDom.innerText
-                        //由于contenteditable属性产生的换行机制问题
-                        //纯文本模式下，会加Unicode等于10和160的2位字符，
-                        val = val.replace(/[\u000A|\u00A0]/g, function (t) {
-                            return " "
-                        })
-                    }
 
-                    // for(var i=0 ;i<sql.length;i++){
-                    //     console.log(sql[i]+":"+sql.charCodeAt(i))
-                    // }
-
+                    var val = this.getTextareaValue(inputDom)
                     return val.substring(inputDom.selectionStart,
                         inputDom.selectionEnd) || val;
                 }
+            },
+            getTextareaValue: function (inputDom) {
+
+                var val = "";
+                if (inputDom.tagName.toLowerCase() === "textarea") {
+                    val = inputDom.value
+                } else {
+                    val = inputDom.innerText
+                    //由于contenteditable属性产生的换行机制问题
+                    //纯文本模式下，会加Unicode等于10和160的2位字符，
+                    val = val.replace(/[\u000A|\u00A0]/g, function (t) {
+                        return " "
+                    })
+                }
+                return val
+
+                // for(var i=0 ;i<sql.length;i++){
+                //     console.log(sql[i]+":"+sql.charCodeAt(i))
+                // }
+
             },
             //设置高亮
             setTextSelected: function (inputDom, startIndex, endIndex) {
@@ -980,6 +1000,13 @@
                     contentEditable: "plaintext-only",
                     class: "textarea",
                     // placeholder:"这里输入sql"
+                })
+                var _this = this;
+
+                //sql语法高亮
+                _.addEvent("blur", textarea, function (e) {
+                    textarea.innerHTML =
+                        _this.hightlightSql(_this.getTextareaValue(textarea))
                 })
 
                 var btn = _.div("执行sql", {
