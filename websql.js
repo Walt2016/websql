@@ -275,7 +275,9 @@
             this.data = options.data;
             //所有数据
             this.rs = [];
-            this.sqls = {};
+            // this.sqls = {};
+            this.sqls = [];
+            // this.activeTbls=[];
 
             this.gridConfig = [{
                     label: "显示字段别名",
@@ -309,7 +311,7 @@
             createTbls: function (tbls) {
                 var tbls = tbls || this.tbls;
                 var _this = this;
-
+                _this.sqls = [];
                 this.db.transaction(function (tx) {
                     for (var t in tbls) {
                         var flds = tbls[t].map(function (t) {
@@ -317,6 +319,10 @@
                         });
                         var sql = `CREATE TABLE IF NOT EXISTS ${t}(${flds})`
                         console.log(sql)
+                        _this.sqls.push({
+                            tbl: t,
+                            sql: sql
+                        })
                         tx.executeSql(sql, [], function (ctx, result) {
                             console.log("创建表成功 " + t);
                         }, function (tx, error) {
@@ -325,10 +331,12 @@
                             _this.errorCall && _this.errorCall(error.message)
                         })
                     }
+                    _this.setSqlcmd.call(_this)
                 });
             },
             insert: function (tbl, rs, callback) {
                 var _this = this;
+                _this.sqls = [];
                 this.db.transaction(function (tx) {
                     var flds = _this.tbls[tbl].map(function (t) {
                         return t.prop ? t.prop : t;
@@ -339,6 +347,10 @@
                         var vs = flds.map(function (t) {
                             return r[t]
                         });
+                        _this.sqls.push({
+                            tbl: tbl,
+                            sql: `INSERT INTO ${tbl}(${flds}) values(${vs})`
+                        })
                         tx.executeSql(sql, vs, function (tx, result) {
                             console.log("insert ok")
                             // console.log(tx, result)
@@ -352,19 +364,21 @@
                         });
                     })
                     callback && callback(tbl);
+                    _this.setSqlcmd.call(_this)
                 });
             },
             empty: function (tbls, callback) {
                 var tbls = tbls == null || tbls.length == 0 ? this.tbls : tbls;
                 var _this = this;
-                var sqls = []
+               _this.sqls = []
                 for (var t in tbls) {
-                    sqls.push({
+                    _this.sqls.push({
                         sql: `DELETE FROM ${t}`,
                         tbl: t
                     })
                 }
-                this.exe(sqls, callback)
+                this.exe(_this.sqls, callback)
+                _this.setSqlcmd.call(_this)
                 // var del = function (tx, t) {
                 //     var sql = `DELETE FROM ${t}`
                 //     console.log(tx, sql)
@@ -428,13 +442,14 @@
                 //     // }
                 // }
 
-                var sqls = tbls.map(t => {
+                _this.sqls = tbls.map(t => {
                     return {
                         tbl: t,
                         sql: `SELECT * FROM ${t} ${condition}`
                     }
                 })
-                this.exe(sqls, callback)
+                this.exe(_this.sqls, callback)
+                _this.setSqlcmd.call(_this)
             },
             //执行sql
             exe: function (sql, callback, errorCall) {
@@ -531,7 +546,7 @@
                             }
                         } else {
                             _this.createList([tname])
-                            _this.activeHd(tname)
+                            // _this.activeHd(tname)
                         }
                     }
                 })
@@ -567,7 +582,7 @@
                                 _this.list([tname], options || {}, function (rs, tname) {
                                     tbody.parentNode.replaceChild(_this.createGrid(tname, rs, options, "tbody"), tbody)
 
-                                    _this.setSqlcmd.call(_this, tname)
+                                    // _this.setSqlcmd.call(_this, tname)
                                 });
                             }
                         }
@@ -655,17 +670,18 @@
                 bd.innerHTML = "";
                 _this.list(tbls, options || {}, function (rs, tname) {
                     bd.appendChild(_.li(_this.createGrid(tname, rs, options)))
-                    _this.setSqlcmd.call(_this)
+                    // _this.setSqlcmd.call(_this)
                 });
             },
             //sql关键字高亮
             hightlightSql: function (sql) {
-                var keys=["select", "from", "where", "desc", "asc",  "on","delete","values","if","not","EXISTS",
-                "insert\\s+into","create\\s+table",
-                "order\\s+by", "group\s+by", "left\\s+join", "right\\s+join", "inner\\s+join"]
+                var keys = ["select", "from", "where", "desc", "asc", "on", "delete", "values", "if", "not", "EXISTS",
+                    "insert\\s+into", "create\\s+table",
+                    "order\\s+by", "group\s+by", "left\\s+join", "right\\s+join", "inner\\s+join"
+                ]
                 var reg1 = new RegExp("(" + keys.join("|") + ")", "gi");
                 return sql.replace(reg1, function (t) {
-                    return _.wrap("font", (t.toUpperCase()).replace(/\s+/," "), {
+                    return _.wrap("font", (t.toUpperCase()).replace(/\s+/, " "), {
                         class: "red"
                     })
                 }).replace(/;\s*/g, ";<br>")
@@ -675,21 +691,28 @@
                 var _this = this;
 
                 if (sqlcmd) {
-                    var tbls = this.getTbls()
+                    // var tbls = this.getTbls()
                     if (sqlcmd.tagName.toLowerCase() === "textarea") {
-                        sqlcmd.value = tbls.map(function (t) {
-                            return (_this.sqls[t] || "").trim()
+                        sqlcmd.value = this.sqls.map(function (t) {
+                            return t.sql
                         }).join(";\n")
+                        //  tbls.map(function (t) {
+                        //     return (_this.sqls[t] || "").trim()
+                        // }).join(";\n")
                     } else { //contenteditable
                         // sqlcmd.innerHTML = tbls.map(function (t) {
                         //     return _this.hightlightSql((_this.sqls[t] || "").trim())
                         // }).join(";<br>")
 
-                        sqlcmd.innerHTML = _this.hightlightSql(tbls.map(function (t) {
-                            return (_this.sqls[t] || "").trim()
-                        }).join(";"))
+                        // sqlcmd.innerHTML = _this.hightlightSql(tbls.map(function (t) {
+                        //     return (_this.sqls[t] || "").trim()
+                        // }).join(";"))
+
+                        sqlcmd.innerHTML = _this.hightlightSql(this.sqls.map(function (t) {
+                            return t.sql
+                        }).join(";\n"))
                     }
-                    this.activeHd(tbls)
+                    // this.activeHd(tbls)
                 }
             },
             getTbls: function () {
