@@ -1,4 +1,4 @@
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
     display: none;
 }
 
@@ -18,7 +18,7 @@
     background: #111;
     color: #fff;
     font-weight: bold
-}
+} */
 
 html {
     color: #333;
@@ -321,12 +321,12 @@ a {
     margin-bottom: 10px;
 }
 
-table.dataintable td.number {
+.dataintable table td.number {
     color: #F36140;
     white-space: nowrap;
 }
 
-table.dataintable td.date::before {
+.dataintable table td.date::before {
     content: "\23f1";
     font-size: 12px;
     margin-right: 10px;
@@ -361,6 +361,11 @@ table thead th[seq='desc'] .icon::before {
 
 table thead th[seq='asc'] .icon::before {
     content: "\2191";
+}
+
+.table-fixed-body{
+    height: 400px;
+    overflow-y: auto;
 }
 
 
@@ -560,14 +565,14 @@ table thead th[seq='asc'] .icon::before {
 
 
 
-table.dataintable {
+.dataintable table {
     /* margin-top: 15px; */
     border-collapse: collapse;
     border: 1px solid #aaa;
     width: 100%;
 }
 
-table.dataintable th {
+.dataintable table th {
     vertical-align: baseline;
     padding: 5px 15px 5px 6px;
     background-color: #3F3F3F;
@@ -576,21 +581,21 @@ table.dataintable th {
     color: #fff;
 }
 
-table.dataintable td {
+.dataintable table td {
     vertical-align: text-top;
     padding: 6px 15px 6px 6px;
     border: 1px solid #aaa;
 }
 
-table.dataintable tr:nth-child(odd) {
+.dataintable table tr:nth-child(odd) {
     background-color: #F5F5F5;
 }
 
-table.dataintable tr:nth-child(even) {
+.dataintable table tr:nth-child(even) {
     background-color: #fff;
 }
 
-table.dataintable pre {
+.dataintable table pre {
     width: auto;
     margin: 0;
     padding: 0;
@@ -598,23 +603,23 @@ table.dataintable pre {
     background-color: transparent;
 }
 
-table.dataintable p {
+.dataintable table p {
     margin: 0 0 2px 0;
 }
 
-div#maincontent table.dataintable ul,
-div#maincontent table.dataintable li {
+div#maincontent .dataintable table ul,
+div#maincontent .dataintable table li {
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-table.dataintable td em {
+.dataintable table td em {
     color: #0000ff;
     font-weight: normal;
 }
 
-table.dataintable .table_value {
+.dataintable table .table_value {
     color: #0F93D2;
 }
 
@@ -622,17 +627,17 @@ table.dataintable .table_value {
     white-space: nowrap;
 }
 
-div#maincontent table.dataintable ul.listintable {
+div#maincontent .dataintable table ul.listintable {
     margin: 20px;
     padding: 0;
 }
 
-div#maincontent table.dataintable ul.listintable li {
+div#maincontent .dataintable table ul.listintable li {
     list-style-type: disc;
 }
 
 
-/* table.dataintable td.html5_new {
+/* .dataintable table td.html5_new {
     background: transparent url(/ui2017/table_bg_html5.png) top right no-repeat;
 } */
 

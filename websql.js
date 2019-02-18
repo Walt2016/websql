@@ -205,25 +205,36 @@
                         break;
                     case "null":
                     case "nan":
+                    case "undefined":
                         break;
                     default:
                         ele.appendChild(text)
                 }
             }
             append(text)
+            if(tag.toLowerCase()==="input"){
+                
+            }
             for (var key in options) {
-                ele.setAttribute(key, options[key])
+                if(tag.toLowerCase()==="input"&&key==="checked"){
+                    if(options[key]){
+                        ele.setAttribute(key, options[key])
+                    }
+                }else{
+                    ele.setAttribute(key, options[key])
+                }
+                
             }
             return ele;
         },
         createCheckbox: function (options) {
             var checkbox = _.createEle("input", "", _.extend({
                 type: "checkbox",
-                class:"checkbox"
+                class: "checkbox"
             }, options))
             if (options) {
-                var label = _.div(options.label,{
-                    class:"label"
+                var label = _.div(options.label, {
+                    class: "label"
                 })
                 return _.div([checkbox, label], {
                     class: "input-group"
@@ -286,21 +297,26 @@
             this.gridConfig = [{
                     label: "显示字段别名",
                     checked: true,
-                    name: "showLabel"
+                    name: "label"
                 }, {
                     label: "显示序号列",
                     checked: true,
-                    name: "showSeq"
+                    name: "seq"
                 },
                 {
                     label: "显示选择列",
                     checked: true,
-                    name: "showCheck"
+                    name: "check"
                 },
                 {
                     label: "合计数字列",
                     checked: true,
-                    name: "showStatistic"
+                    name: "statistic"
+                },
+                {
+                    label: "固定表头",
+                    checked: false,
+                    name: "fixedhead"
                 },
                 // {
                 //     label: "允许多表查询",
@@ -557,10 +573,15 @@
                 _.addEvent("click", bd, function (e) {
                     var el = e.target,
                         thead = _.closest(el, "thead"),
-                        table = _.closest(el, "table");
+                        // table = _.closest(el, "table");
+                        table = _.closest(el, ".dataintable");
+
+                    // table.parentNode()
 
                     if (thead) {
-                        var tbody = thead.nextSibling;
+                        // var tbody = thead.nextSibling;
+                        // var dataintable=_.closest(el, ".dataintable");
+                        var tbody = _.query("tbody", table);
                         if (el.nodeName.toLowerCase() === "input" && el.getAttribute("type") === "checkbox") {
                             //全选
                             var inputs = _.queryAll("input[type='checkbox']", tbody);
@@ -752,6 +773,10 @@
             createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.getTbl(rs, tname);
                 var config = _.extend(this.getGridConfig(), options)
+                // var resultType = resultType?resultType: config.fixedhead ? "fixedhead" : resultType;
+                if(!resultType && config.fixedhead ){
+                    resultType="fixedhead"
+                }
 
                 var _row = function (r, i) {
                     var arr = _.obj2arr(r),
@@ -799,9 +824,12 @@
                 var showFoot = false;
 
                 //定义列宽
+                var defWidth = (100 - 5 * offset) / tbl.length + "%"
                 var colgroup = tbl.map(function (t) {
                     return _.col("", {
-                        style: "width: " + t.width ? t.width : "auto" + ";"
+                        // style: "width: " + (t.width ? t.width : "auto") + ";"
+
+                        style: "width: " + (t.width ? t.width : defWidth) + ";"
                     })
                 })
                 if (config.seq) colgroup.unshift(_.col("", {
@@ -873,12 +901,34 @@
                     case "tfoot":
                         return _.tfoot(tfoot);
                         break;
-                    default:
-                        return _.createEle("table",
-                            [_.colgroup(colgroup), _.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
-                                class: "dataintable",
+                    case "fixedhead":
+                        var cols = _.colgroup(colgroup)
+                        return _.div([
+                            _.div(_.table([cols, _.thead(thead)], {
+                                // class: "dataintable",
                                 tablename: tname
-                            });
+                            }), {
+                                class: "table-fixed-head"
+                            }),
+                            _.div(_.table([cols.cloneNode(true), _.tbody(tbody), _.tfoot(tfoot)], {
+                                // class: "dataintable",
+                                tablename: tname
+                            }), {
+                                class: "table-fixed-body"
+                            })
+
+                        ], {
+                            class: "dataintable",
+                            tablename: tname
+                        })
+                        break;
+                    default:
+                        return  _.div(_.table([_.colgroup(colgroup), _.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
+                            tablename: tname
+                        }), {
+                            class: "dataintable",
+                            tablename: tname
+                        });
                 }
 
             },
@@ -1116,7 +1166,8 @@
                 var config = {}
                 this.gridConfig.forEach(function (t) {
                     var val = _.query("input[name='" + t.name + "']").checked
-                    var key = t.name.substring(4).toLowerCase();
+                    // var key = t.name.substring(4).toLowerCase();
+                    var key = t.name.toLowerCase();
                     config[key] = val
                 })
                 return config
