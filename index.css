@@ -283,6 +283,9 @@ a {
 .input-group {
     display: flex;
 }
+.input-group .label{
+    margin-left: 4px;
+}
 
 .sqlcmd {
     display: flex;
@@ -319,7 +322,8 @@ a {
 }
 
 table.dataintable td.number {
-    color: #F36140
+    color: #F36140;
+    white-space: nowrap;
 }
 
 table.dataintable td.date::before {
@@ -634,4 +638,26 @@ div#maincontent table.dataintable ul.listintable li {
 
 tr.notsupported {
     color: #999999;
+}
+
+.checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    vertical-align: middle;
+    outline: 0;
+    -webkit-appearance: none;
+    border: 1px solid #bbb;
+    /* border-radius: 50%; */
+    /* box-sizing: border-box; */
+    /* background-color: #fff; */
+}
+.checkbox:checked {
+    background-image: url(sprite/cos-201901241518.svg);
+    background-color: #3F3F3F;
+    border-color: #3F3F3F;
+    background-position: 98.66% 53.03%;
+    background-size: 1700% 1514.2857142857142%;
+    background-repeat: no-repeat;
+    
 }

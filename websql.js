@@ -219,9 +219,12 @@
         createCheckbox: function (options) {
             var checkbox = _.createEle("input", "", _.extend({
                 type: "checkbox",
+                class:"checkbox"
             }, options))
             if (options) {
-                var label = _.div(options.label)
+                var label = _.div(options.label,{
+                    class:"label"
+                })
                 return _.div([checkbox, label], {
                     class: "input-group"
                 });
@@ -236,20 +239,20 @@
             return str;
         }
     };
-    ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i"].forEach(function (t) {
+    ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i", "span", "colgroup", "col"].forEach(function (t) {
         _[t] = function (text, options) {
             return _.createEle(t, text, options)
         }
     });
 
-    var _log = console.log
-    console.log = function () {
-        if (_.type(arguments[0]) === "HTMLDivElement".toLowerCase()) {
-            _log.call(console, _.stringify(arguments[0]), 'color:blue')
-        } else {
-            _log.call(console, [].slice.call(arguments).join(" "))
-        }
-    }
+    // var _log = console.log
+    // console.log = function () {
+    //     if (_.type(arguments[0]) === "HTMLDivElement".toLowerCase()) {
+    //         _log.call(console, _.stringify(arguments[0]), 'color:blue')
+    //     } else {
+    //         _log.call(console, [].slice.call(arguments).join(" "))
+    //     }
+    // }
 
 
     var _websql = function () {
@@ -263,6 +266,7 @@
             }, options)
 
             //创建数据库
+
             var db = this.db = window.openDatabase(
                 options.dbname,
                 options.version,
@@ -370,7 +374,7 @@
             empty: function (tbls, callback) {
                 var tbls = tbls == null || tbls.length == 0 ? this.tbls : tbls;
                 var _this = this;
-               _this.sqls = []
+                _this.sqls = []
                 for (var t in tbls) {
                     _this.sqls.push({
                         sql: `DELETE FROM ${t}`,
@@ -794,6 +798,20 @@
                 var len = rs.length;
                 var showFoot = false;
 
+                //定义列宽
+                var colgroup = tbl.map(function (t) {
+                    return _.col("", {
+                        style: "width: " + t.width ? t.width : "auto" + ";"
+                    })
+                })
+                if (config.seq) colgroup.unshift(_.col("", {
+                    style: "width: 5%;"
+                }));
+                if (config.check) colgroup.unshift(_.col("", {
+                    style: "width: 5%;"
+                }));
+
+
                 var orderby = config.orderby || ""
                 var thead =
                     tbl.map(function (t) {
@@ -843,6 +861,9 @@
                     });
                 }) : "";
                 switch (resultType) {
+                    case "colgroup":
+                        _.colgroup(colgroup);
+                        break;
                     case "thead":
                         return _.thead(thead);
                         break;
@@ -854,7 +875,7 @@
                         break;
                     default:
                         return _.createEle("table",
-                            [_.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
+                            [_.colgroup(colgroup), _.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
                                 class: "dataintable",
                                 tablename: tname
                             });

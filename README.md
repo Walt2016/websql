@@ -18,9 +18,11 @@
 - 日期 ok
 - 数字 ok
 - 合计 ok
+- 列宽 ok
 
 
-- sql ok
+- sql 执行 ok
+- sql 语法高亮 ok
 
 ## 演示
 https://walt2016.github.io/websql/
