@@ -23,6 +23,7 @@
 
 
 - sql 执行 ok
+- 多sql 执行 ok
 - sql 语法高亮 ok
 
 ## 演示

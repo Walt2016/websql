@@ -90,11 +90,29 @@
             },
 
         ];
+        var sys_log=[
+            {
+                prop:"time",
+                label:'时间',
+                type:"date"
+            },
+            {
+                prop:"sql",
+                label:'SQL',
+                type:"sql"
+            },
+            {
+                prop:"duration",
+                label:'执行时间',
+                type:"number"
+            }
+        ]
 
         var tbls = {
             "SSF_GOODS": SSF_GOODS,
             "SSF_ORDER": SSF_ORDER,
-            "SSF_ORDER_DETAILS": SSF_ORDER_DETAILS
+            "SSF_ORDER_DETAILS": SSF_ORDER_DETAILS,
+            "sys_log":sys_log
         }
         var goodsList = [{
                 GOODSID: 32011,
@@ -240,6 +258,7 @@
         var tools=document.querySelector(".tools")
         tools.appendChild(ws.createBtns());
         tools.appendChild(ws.createSqlcmd())
+        // tools.appendChild(ws.createExeSqlHistory())
         var demo=document.querySelector(".demo")
         demo.appendChild(ws.createSlide())
     </script>

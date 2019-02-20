@@ -212,18 +212,18 @@
                 }
             }
             append(text)
-            if(tag.toLowerCase()==="input"){
-                
+            if (tag.toLowerCase() === "input") {
+
             }
             for (var key in options) {
-                if(tag.toLowerCase()==="input"&&key==="checked"){
-                    if(options[key]){
+                if (tag.toLowerCase() === "input" && key === "checked") {
+                    if (options[key]) {
                         ele.setAttribute(key, options[key])
                     }
-                }else{
+                } else {
                     ele.setAttribute(key, options[key])
                 }
-                
+
             }
             return ele;
         },
@@ -285,13 +285,23 @@
                 options.dbsize
             );
             //表结构
-            this.tbls = options.tbls;
+            this.tbls = options.tbls || [];
             //表数据
             this.data = options.data;
             //所有数据
             this.rs = [];
-            // this.sqls = {};
+            //[{
+            //     tbl:tbl
+            //     sql:sql
+            // }]
             this.sqls = [];
+            //执行历史
+            this.exeSqlHistroy = [];
+            //执行效率 {
+            //     sql:sql
+            //     eff:eff
+            // }
+            this.efficiency = []
             // this.activeTbls=[];
 
             this.gridConfig = [{
@@ -455,13 +465,6 @@
 
                 var tbls = tbls || [];
                 var _this = this;
-                // if (tbls.length === 0) {
-                //     return
-                //     // for (var tbl in _this.tbls) {
-                //     //     tbls.push(tbl)
-                //     // }
-                // }
-
                 _this.sqls = tbls.map(t => {
                     return {
                         tbl: t,
@@ -478,14 +481,30 @@
                     // console.log(sql)
 
                     console.time(sql);
+                    var timeStart = +new Date();
                     tx.executeSql(sql, [], function (tx, results) {
-                        // console.log(results)
-                        _this.sqls[tbl] = sql;
+
+                        _this.sqls.forEach(function (t) {
+                            if (t.tbl === tbl) {
+                                t.sql = sql
+                            }
+                        })
                         _this.rs[tbl] = [];
                         for (var i = 0; i < results.rows.length; i++) {
                             _this.rs[tbl].push(results.rows.item(i));
                         }
+                        var timeEnd = +new Date();
                         console.timeEnd(sql);
+                        var duration = timeEnd - timeStart
+                        //    var el= _.div("执行时间"+duration+"ms")
+                        // _this.exeSqlHistroy.push({
+                        //     sql: sql,
+                        //     time: duration
+                        // })
+                        if(tbl!=="sys_log")
+                        _this.log(sql,duration)
+                        // _this.updateExeSqlHistory();
+
 
                         callback && callback.call(_this, _this.rs[tbl], tbl);
                     }, function (tx, error) {
@@ -506,12 +525,30 @@
 
                 })
             },
+            log:function(sql,duration){
+                // var sql=`insert into`
+                var sqlLog = `INSERT INTO sys_log values(?,?,?)`;
+                var vals=[+new Date(),sql,duration]
+                this.db.transaction(function (tx) {
+                    tx.executeSql(sqlLog, vals, function (tx, results) {
+                        console.log(results)
+
+                    }, function (tx, error) {
+                        // console.error(  error.message);
+                        // errorCall && errorCall(error.message)
+                    })
+
+                })
+
+            },
             //表名导航
             hd: function () {
                 var tbls = [];
                 var _this = this;
                 for (var tbl in _this.tbls) {
-                    tbls.push(tbl)
+                    if(tbl.indexOf("sys_")===-1){
+                        tbls.push(tbl)
+                    }
                 }
                 return _.wrap("ul", tbls.map(function (t) {
                     return _.wrap("li", _.wrap("i", "") +
@@ -525,7 +562,9 @@
                 var tbls = [];
                 var _this = this;
                 for (var tbl in _this.tbls) {
+                    if(tbl.indexOf("sys_")===-1){
                     tbls.push(tbl)
+                    }
                 }
                 return _.ul(tbls.map(function (t) {
                     return _.li([_.i(""),
@@ -575,12 +614,7 @@
                         thead = _.closest(el, "thead"),
                         // table = _.closest(el, "table");
                         table = _.closest(el, ".dataintable");
-
-                    // table.parentNode()
-
                     if (thead) {
-                        // var tbody = thead.nextSibling;
-                        // var dataintable=_.closest(el, ".dataintable");
                         var tbody = _.query("tbody", table);
                         if (el.nodeName.toLowerCase() === "input" && el.getAttribute("type") === "checkbox") {
                             //全选
@@ -637,7 +671,11 @@
                 }, {
                     key: "list",
                     val: "列表"
-                }].map((t) => {
+                },{
+                    key:"log",
+                    val:"日志"
+                }
+            ].map((t) => {
                     return _.div(t.val, {
                         class: "btn " + t.key
                     })
@@ -670,6 +708,9 @@
                         case "del":
                             _this.del("SSF_ORDER_DETAILS", 1);
                             break;
+                        case "log":
+                        _this.createList(["sys_log"])
+                        break;
                         default:
                             act && _this[act] && _this[act]();
                     }
@@ -773,9 +814,8 @@
             createGrid: function (tname, rs, options, resultType) {
                 var tbl = this.getTbl(rs, tname);
                 var config = _.extend(this.getGridConfig(), options)
-                // var resultType = resultType?resultType: config.fixedhead ? "fixedhead" : resultType;
-                if(!resultType && config.fixedhead ){
-                    resultType="fixedhead"
+                if (!resultType && config.fixedhead) {
+                    resultType = "fixedhead"
                 }
 
                 var _row = function (r, i) {
@@ -923,7 +963,7 @@
                         })
                         break;
                     default:
-                        return  _.div(_.table([_.colgroup(colgroup), _.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
+                        return _.div(_.table([_.colgroup(colgroup), _.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
                             tablename: tname
                         }), {
                             class: "dataintable",
@@ -1161,6 +1201,41 @@
                     class: "sqlcmd"
                 })
             },
+            //执行效率
+            // createEfficiency: function () {
+
+
+            // },
+            // createExeSqlHistory:function(){
+            //  var his=   this.createHistoryItem()
+            //     return _.ul(his,{
+            //         class:"exeSqlHistory"
+            //     })
+            // },
+            // createHistoryItem:function(){
+            //     return this.exeSqlHistroy.map(function(t){
+            //        return _.li([_.div(t.sql,{
+            //             class:"sql"
+            //         }),
+            //         _.div(t.time,{
+            //             class:"time"
+            //         })],{
+            //             class:"exeSqlHistory_item"
+            //         })
+            //     })
+            // },
+            // updateExeSqlHistory:function(){
+            //   var  exeSqlHistory= _.query(".exeSqlHistory")
+            //   exeSqlHistory.innerHTML-""
+
+            //   var his=this.createHistoryItem();
+              
+
+            //   his.forEach(function(t){
+            //     exeSqlHistory.appendChild(t)
+            //   })
+
+            // },
             //
             getGridConfig: function () {
                 var config = {}

@@ -265,6 +265,14 @@ a {
     color: #ccc;
 }
 
+.btn-group .btn:nth-child(5)::before {
+    content: "\2464";
+    width: 15px;
+    height: 15px;
+    /* font-size: 12px; */
+    margin-right: 10px;
+    color: #ccc;
+}
 
 .btn-group {
     flex-direction: column
