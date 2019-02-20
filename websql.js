@@ -390,7 +390,6 @@
                             // console.log(error.message)
                             // throw new Error(error);
                             _this.errorCall && _this.errorCall(error.message)
-
                         });
                     })
                     callback && callback(tbl);
@@ -501,8 +500,8 @@
                         //     sql: sql,
                         //     time: duration
                         // })
-                        if(tbl!=="sys_log")
-                        _this.log(sql,duration)
+                        if (tbl !== "sys_log")
+                            _this.log(sql, duration)
                         // _this.updateExeSqlHistory();
 
 
@@ -525,10 +524,10 @@
 
                 })
             },
-            log:function(sql,duration){
+            log: function (sql, duration) {
                 // var sql=`insert into`
                 var sqlLog = `INSERT INTO sys_log values(?,?,?)`;
-                var vals=[+new Date(),sql,duration]
+                var vals = [+new Date(), sql, duration]
                 this.db.transaction(function (tx) {
                     tx.executeSql(sqlLog, vals, function (tx, results) {
                         console.log(results)
@@ -546,7 +545,7 @@
                 var tbls = [];
                 var _this = this;
                 for (var tbl in _this.tbls) {
-                    if(tbl.indexOf("sys_")===-1){
+                    if (tbl.indexOf("sys_") === -1) {
                         tbls.push(tbl)
                     }
                 }
@@ -562,8 +561,8 @@
                 var tbls = [];
                 var _this = this;
                 for (var tbl in _this.tbls) {
-                    if(tbl.indexOf("sys_")===-1){
-                    tbls.push(tbl)
+                    if (tbl.indexOf("sys_") === -1) {
+                        tbls.push(tbl)
                     }
                 }
                 return _.ul(tbls.map(function (t) {
@@ -671,11 +670,10 @@
                 }, {
                     key: "list",
                     val: "列表"
-                },{
-                    key:"log",
-                    val:"日志"
-                }
-            ].map((t) => {
+                }, {
+                    key: "log",
+                    val: "日志"
+                }].map((t) => {
                     return _.div(t.val, {
                         class: "btn " + t.key
                     })
@@ -697,9 +695,24 @@
                             _this.createList(tbls);
                             break;
                         case "add":
+                            var tbls = []
+                            _.queryAll(".dataintable").forEach(function (t) {
+                                tbls.push(t.getAttribute("tablename"))
+                            })
                             for (var tbl in data) {
                                 console.log(tbl)
-                                _this.insert(tbl, data[tbl], _this.reflashList.bind(_this))
+
+                                // if(tbls.indexOf(tbl)>=0){
+
+                                // }else{
+
+                                // }
+
+                                _this.insert(tbl, data[tbl])
+
+                                // _this.insert(tbl, data[tbl], tbls.indexOf(tbl) >= 0 ? _this.reflashList.bind(_this) : null)
+
+
                             }
                             break;
                         case "empty":
@@ -709,8 +722,8 @@
                             _this.del("SSF_ORDER_DETAILS", 1);
                             break;
                         case "log":
-                        _this.createList(["sys_log"])
-                        break;
+                            _this.createList(["sys_log"])
+                            break;
                         default:
                             act && _this[act] && _this[act]();
                     }
@@ -719,13 +732,25 @@
                 return btnGroup
             },
             reflashList: function (tbl) {
-                console.log(tbl);
-                var activeLi = document.querySelector(".slide .hd li[active]");
-                if (activeLi) {
-                    var tname = activeLi.innerText.trim();
-                    // if (tbl === tname) 
-                    this.createList([tname]);
-                }
+                // console.log(tbl);
+                // var activeLi = document.querySelector(".slide .hd li[active]");
+
+
+                // if (activeLi) {
+                //     var tname = activeLi.innerText.trim();
+                //     // if (tbl === tname) 
+                //     this.createList([tname]);
+                // }
+
+
+
+                var tbls = [];
+                _.queryAll(".dataintable").forEach(function (t) {
+                    tbls.push(t.getAttribute("tablename"));
+                })
+
+                this.createList(tbls);
+
             },
             //代替showList  创建el方式替代字符串拼接
             createList: function (tbls, options) {
@@ -1229,7 +1254,7 @@
             //   exeSqlHistory.innerHTML-""
 
             //   var his=this.createHistoryItem();
-              
+
 
             //   his.forEach(function(t){
             //     exeSqlHistory.appendChild(t)
