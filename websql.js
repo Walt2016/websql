@@ -295,15 +295,6 @@
             //     sql:sql
             // }]
             this.sqls = [];
-            //执行历史
-            this.exeSqlHistroy = [];
-            //执行效率 {
-            //     sql:sql
-            //     eff:eff
-            // }
-            this.efficiency = []
-            // this.activeTbls=[];
-
             this.gridConfig = [{
                     label: "显示字段别名",
                     checked: true,
@@ -495,15 +486,8 @@
                         var timeEnd = +new Date();
                         console.timeEnd(sql);
                         var duration = timeEnd - timeStart
-                        //    var el= _.div("执行时间"+duration+"ms")
-                        // _this.exeSqlHistroy.push({
-                        //     sql: sql,
-                        //     time: duration
-                        // })
                         if (tbl !== "sys_log")
                             _this.log(sql, duration)
-                        // _this.updateExeSqlHistory();
-
 
                         callback && callback.call(_this, _this.rs[tbl], tbl);
                     }, function (tx, error) {
@@ -1226,42 +1210,6 @@
                     class: "sqlcmd"
                 })
             },
-            //执行效率
-            // createEfficiency: function () {
-
-
-            // },
-            // createExeSqlHistory:function(){
-            //  var his=   this.createHistoryItem()
-            //     return _.ul(his,{
-            //         class:"exeSqlHistory"
-            //     })
-            // },
-            // createHistoryItem:function(){
-            //     return this.exeSqlHistroy.map(function(t){
-            //        return _.li([_.div(t.sql,{
-            //             class:"sql"
-            //         }),
-            //         _.div(t.time,{
-            //             class:"time"
-            //         })],{
-            //             class:"exeSqlHistory_item"
-            //         })
-            //     })
-            // },
-            // updateExeSqlHistory:function(){
-            //   var  exeSqlHistory= _.query(".exeSqlHistory")
-            //   exeSqlHistory.innerHTML-""
-
-            //   var his=this.createHistoryItem();
-
-
-            //   his.forEach(function(t){
-            //     exeSqlHistory.appendChild(t)
-            //   })
-
-            // },
-            //
             getGridConfig: function () {
                 var config = {}
                 this.gridConfig.forEach(function (t) {
