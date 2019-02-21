@@ -25,6 +25,8 @@
 - sql 执行 ok
 - 多sql 执行 ok
 - sql 语法高亮 ok
+- 日志及sql执行效率   ok
+
 
 ## 演示
 https://walt2016.github.io/websql/
