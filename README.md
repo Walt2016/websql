@@ -48,5 +48,5 @@ select * from ssf_goods a inner join ssf_order_details b on a.goodsid=b.goodsid
 - 日志及sql执行效率   ok
 
 
-## 演示
+## DEMO地址
 https://walt2016.github.io/websql/
