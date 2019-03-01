@@ -1223,7 +1223,7 @@
         })
     }();
     if (!window.openDatabase) {
-        alert("当前环境不支持websql！");
+        alert("当前环境不支持websql！请用谷歌浏览器试试！");
         return;
     }
     return _websql
