@@ -791,7 +791,7 @@
             hightlightSql: function (sql) {
                 var keys = ["select", "from", "where", "desc", "asc", "on", "delete", "values", "if", "not", "EXISTS",
                     "insert\\s+into", "create\\s+table",
-                    "order\\s+by", "group\s+by", "left\\s+join", "right\\s+join", "inner\\s+join"
+                    "order\\s+by", "group\\s+by", "left\\s+join", "right\\s+join", "inner\\s+join"
                 ]
                 var reg1 = new RegExp("(" + keys.join("|") + ")", "gi");
                 return sql.replace(reg1, function (t) {
@@ -982,9 +982,7 @@
                     click: function (e) {
                         var el = e.target,
                             table = _.closest(el, ".dataintable");
-
                         var cbs = _.queryAll("tbody input[type='checkbox']:checked", table);
-
                         var tablename = table.getAttribute("tablename")
                         // var sql=""
                         cbs.forEach(function (t) {
