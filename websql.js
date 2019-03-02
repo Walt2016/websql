@@ -183,11 +183,11 @@
             return text === null ? _.start(tag, options) : _.start(tag, options) + text + _.end(tag);
         },
         //创建DOm 方式
-        createEle: function (tag, text, options) {
+        createEle: function (tag, text, props, events) {
             var i = tag.indexOf(" ");
             if (i > 0) {
                 var leftTag = tag.substring(0, i)
-                return _.createEle(leftTag, _.createEle(tag.substring(i + 1), text, options))
+                return _.createEle(leftTag, _.createEle(tag.substring(i + 1), text, props, events))
             }
             var ele = document.createElement(tag);
             var append = function (text) {
@@ -215,23 +215,44 @@
             if (tag.toLowerCase() === "input") {
 
             }
-            for (var key in options) {
+            for (var key in props) {
                 if (tag.toLowerCase() === "input" && key === "checked") {
-                    if (options[key]) {
-                        ele.setAttribute(key, options[key])
+                    if (props[key]) {
+                        ele.setAttribute(key, props[key])
                     }
                 } else {
-                    ele.setAttribute(key, options[key])
+                    ele.setAttribute(key, props[key])
                 }
-
             }
+            for (var key in events) {
+                _.addEvent(key, ele, events[key]);
+            }
+
             return ele;
         },
-        createCheckbox: function (options) {
+        checkbox: function (options) {
             var checkbox = _.createEle("input", "", _.extend({
                 type: "checkbox",
                 class: "checkbox"
-            }, options))
+            }, options), {
+                click: function (e) {
+                    var el = e.target,
+                        table = _.closest(el, ".dataintable");
+                    var numb = _.queryAll("input[type='checkbox']:checked", table).length
+                    var optPanel = _.query(".optPanel", table)
+                    if (optPanel) {
+                        if (numb === 0) {
+                            optPanel.style.overflow = "hidden"
+                            // optPanel.style.bottom = '-55px';
+                        } else {
+                            // optPanel.style.bottom = '-0px';
+                            optPanel.style.overflow = "visible"
+                            // var HistoryCountSpan=_.query(".HistoryCountSpan")
+                            // HistoryCountSpan.innerText = numb
+                        }
+                    }
+                }
+            })
             if (options) {
                 var label = _.div(options.label, {
                     class: "label"
@@ -243,6 +264,22 @@
                 return checkbox
             }
         },
+        btn: function (text, props, events) {
+            if (props && props.class) {
+                props.class = "btn " + props.class
+            }
+            return _.div(text, _.extend({
+                class: "btn"
+            }, props), events)
+        },
+        btnGroup: function (text, props, events) {
+            if (props && props.class) {
+                props.class = "btn-group " + props.class
+            }
+            return _.div(text, _.extend({
+                class: "btn-group"
+            }, props), events)
+        },
         stringify: function (el) {
             var str = el.tagName.toLowerCase();
             str += el.id ? "#" + el.id : "";
@@ -251,8 +288,8 @@
         }
     };
     ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i", "span", "colgroup", "col"].forEach(function (t) {
-        _[t] = function (text, options) {
-            return _.createEle(t, text, options)
+        _[t] = function (text, props, events) {
+            return _.createEle(t, text, props, events)
         }
     });
 
@@ -561,81 +598,83 @@
                 var _this = this;
                 var hd = _.div(this.createHd(), {
                     class: "hd"
+                }, {
+                    click: function (e) {
+                        var el = e.target;
+                        console.log(el)
+                        var li = _.closest(el, "li")
+                        var config = _this.getGridConfig();
+
+                        if (li) {
+                            var tname = li.innerText;
+                            if (!config.multisql) {
+                                _this.toggleHd(tname)
+                                var actLis = _.queryAll(".slide .hd li[active]")
+                                if (actLis) {
+                                    var tbls = []
+                                    actLis.forEach(function (t) {
+                                        tbls.push(t.innerText);
+                                    })
+                                    _this.createList(tbls)
+                                }
+                            } else {
+                                _this.createList([tname])
+                                // _this.activeHd(tname)
+                            }
+                        }
+                    }
                 })
                 var bd = _.div("", {
                     class: "bd"
+                }, {
+                    click: function (e) {
+                        var el = e.target,
+                            thead = _.closest(el, "thead"),
+                            // table = _.closest(el, "table");
+                            table = _.closest(el, ".dataintable");
+                        if (thead) {
+                            var tbody = _.query("tbody", table);
+                            if (el.nodeName.toLowerCase() === "input" && el.getAttribute("type") === "checkbox") {
+                                //全选
+                                var inputs = _.queryAll("input[type='checkbox']", tbody);
+                                inputs.forEach(function (t) {
+                                    t.checked = el.checked; //!t.checked;
+                                })
+                            } else {
+                                //排序
+                                var td = _.closest(el, "th")
+                                if (!td) return;
+                                var prop = td.getAttribute("prop");
+                                if (prop) {
+                                    var seq = td.getAttribute("seq")
+                                    seq = seq === "desc" ? "asc" : "desc"
+                                    _.queryAll("th[seq]", thead).forEach((t) => {
+                                        t.removeAttribute("seq")
+                                    })
+                                    td.setAttribute("seq", seq)
+                                    var tname = table.getAttribute("tablename");
+                                    var options = {
+                                        orderby: prop + " " + seq
+                                    }
+                                    _this.list([tname], options || {}, function (rs, tname) {
+                                        tbody.parentNode.replaceChild(_this.createGrid(tname, rs, options, "tbody"), tbody)
+
+                                        // _this.setSqlcmd.call(_this, tname)
+                                    });
+                                }
+                            }
+                        } else {
+                            var tr = _.closest(el, "tr")
+                            if (!tr) return;
+                            _.queryAll("tr[active]", table).forEach((t) => {
+                                t.removeAttribute("active")
+                            })
+                            tr.setAttribute("active", "");
+                        }
+                    }
                 })
                 var container = _.div([hd, bd], {
                     class: "slide_container"
-                })
-                _.addEvent("click", hd, function (e) {
-                    var el = e.target;
-                    console.log(el)
-                    var li = _.closest(el, "li")
-                    var config = _this.getGridConfig();
-
-                    if (li) {
-                        var tname = li.innerText;
-                        if (!config.multisql) {
-                            _this.toggleHd(tname)
-                            var actLis = _.queryAll(".slide .hd li[active]")
-                            if (actLis) {
-                                var tbls = []
-                                actLis.forEach(function (t) {
-                                    tbls.push(t.innerText);
-                                })
-                                _this.createList(tbls)
-                            }
-                        } else {
-                            _this.createList([tname])
-                            // _this.activeHd(tname)
-                        }
-                    }
-                })
-                _.addEvent("click", bd, function (e) {
-                    var el = e.target,
-                        thead = _.closest(el, "thead"),
-                        // table = _.closest(el, "table");
-                        table = _.closest(el, ".dataintable");
-                    if (thead) {
-                        var tbody = _.query("tbody", table);
-                        if (el.nodeName.toLowerCase() === "input" && el.getAttribute("type") === "checkbox") {
-                            //全选
-                            var inputs = _.queryAll("input[type='checkbox']", tbody);
-                            inputs.forEach(function (t) {
-                                t.checked = el.checked; //!t.checked;
-                            })
-                        } else {
-                            //排序
-                            var td = _.closest(el, "th")
-                            if (!td) return;
-                            var prop = td.getAttribute("prop");
-                            if (prop) {
-                                var seq = td.getAttribute("seq")
-                                seq = seq === "desc" ? "asc" : "desc"
-                                _.queryAll("th[seq]", thead).forEach((t) => {
-                                    t.removeAttribute("seq")
-                                })
-                                td.setAttribute("seq", seq)
-                                var tname = table.getAttribute("tablename");
-                                var options = {
-                                    orderby: prop + " " + seq
-                                }
-                                _this.list([tname], options || {}, function (rs, tname) {
-                                    tbody.parentNode.replaceChild(_this.createGrid(tname, rs, options, "tbody"), tbody)
-
-                                    // _this.setSqlcmd.call(_this, tname)
-                                });
-                            }
-                        }
-                    } else {
-                        var tr = _.closest(el, "tr")
-                        if (!tr) return;
-                        _.queryAll("tr[active]", table).forEach((t) => {
-                            t.removeAttribute("active")
-                        })
-                        tr.setAttribute("active", "");
-                    }
                 })
                 return _.div(container, {
                     class: "slide"
@@ -658,58 +697,58 @@
                     key: "log",
                     val: "日志"
                 }].map((t) => {
-                    return _.div(t.val, {
-                        class: "btn " + t.key
+                    return _.btn(t.val, {
+                        class: t.key
                     })
                 })
+                var _this = this;
                 var btnGroup = _.div(btns, {
                     class: "btn-group"
-                })
-                var _this = this;
+                }, {
+                    click: function (e) {
+                        var act = e.target.className.split(" ")[1]
+                        console.log(e.target, act)
+                        switch (act) {
+                            case "list":
+                                var tbls = [];
+                                for (var tbl in _this.tbls) {
+                                    tbls.push(tbl)
+                                }
+                                _this.createList(tbls);
+                                break;
+                            case "add":
+                                var tbls = []
+                                _.queryAll(".dataintable").forEach(function (t) {
+                                    tbls.push(t.getAttribute("tablename"))
+                                })
+                                for (var tbl in data) {
+                                    console.log(tbl)
 
-                _.addEvent("click", btnGroup, function (e) {
-                    var act = e.target.className.split(" ")[1]
-                    console.log(e.target, act)
-                    switch (act) {
-                        case "list":
-                            var tbls = [];
-                            for (var tbl in _this.tbls) {
-                                tbls.push(tbl)
-                            }
-                            _this.createList(tbls);
-                            break;
-                        case "add":
-                            var tbls = []
-                            _.queryAll(".dataintable").forEach(function (t) {
-                                tbls.push(t.getAttribute("tablename"))
-                            })
-                            for (var tbl in data) {
-                                console.log(tbl)
+                                    // if(tbls.indexOf(tbl)>=0){
 
-                                // if(tbls.indexOf(tbl)>=0){
+                                    // }else{
 
-                                // }else{
+                                    // }
 
-                                // }
+                                    _this.insert(tbl, data[tbl])
 
-                                _this.insert(tbl, data[tbl])
-
-                                // _this.insert(tbl, data[tbl], tbls.indexOf(tbl) >= 0 ? _this.reflashList.bind(_this) : null)
+                                    // _this.insert(tbl, data[tbl], tbls.indexOf(tbl) >= 0 ? _this.reflashList.bind(_this) : null)
 
 
-                            }
-                            break;
-                        case "empty":
-                            _this.empty([], _this.reflashList.bind(_this));
-                            break;
-                        case "del":
-                            _this.del("SSF_ORDER_DETAILS", 1);
-                            break;
-                        case "log":
-                            _this.createList(["sys_log"])
-                            break;
-                        default:
-                            act && _this[act] && _this[act]();
+                                }
+                                break;
+                            case "empty":
+                                _this.empty([], _this.reflashList.bind(_this));
+                                break;
+                            case "del":
+                                _this.del("SSF_ORDER_DETAILS", 1);
+                                break;
+                            case "log":
+                                _this.createList(["sys_log"])
+                                break;
+                            default:
+                                act && _this[act] && _this[act]();
+                        }
                     }
                 })
 
@@ -821,6 +860,7 @@
             },
             //生成表格 dom节点，可加载事件
             createGrid: function (tname, rs, options, resultType) {
+                var _this = this;
                 var tbl = this.getTbl(rs, tname);
                 var config = _.extend(this.getGridConfig(), options)
                 if (!resultType && config.fixedhead) {
@@ -856,7 +896,7 @@
                         });
                     });
                     if (config.seq) cell.unshift(_.td(i === 0 ? "#" : i));
-                    if (config.check) cell.unshift(_.td(_.createCheckbox()));
+                    if (config.check) cell.unshift(_.td(_.checkbox()));
 
 
                     return _.tr(cell, {
@@ -920,7 +960,7 @@
                     });
 
                 if (config.seq) thead.unshift(_.th("#"));
-                if (config.check) thead.unshift(_.th(_.createCheckbox()));
+                if (config.check) thead.unshift(_.th(_.checkbox()));
                 var tfoot = new Array(offset).fill("").concat(typs).map(function (t, i) {
                     return i === 0 ? "合计" : t === "number" ? 0 : "";
                 });
@@ -937,6 +977,42 @@
                         class: t === "" ? "string" : "number"
                     });
                 }) : "";
+
+                var optPanel = _.div([_.btn("删除", {}, {
+                    click: function (e) {
+                        var el = e.target,
+                            table = _.closest(el, ".dataintable");
+
+                        var cbs = _.queryAll("tbody input[type='checkbox']:checked", table);
+
+                        var tablename = table.getAttribute("tablename")
+                        // var sql=""
+                        cbs.forEach(function (t) {
+                            //  sql=`delete from ${tablename} where id=`
+                            var tr = _.closest(t, "tr")
+                            var rowid = tr.getAttribute("rowid")
+                            _this.sqls.push({
+                                tbl: tbl,
+                                sql: `delete from ${tablename} where rowid=${rowid}`
+                            })
+                        })
+                        _this.setSqlcmd.call(_this)
+
+                    }
+                }), _.btn("取消", {}, {
+                    click: function (e) {
+                        var el = e.target,
+                            table = _.closest(el, ".dataintable");
+                        var cbs = _.queryAll("input[type='checkbox']:checked", table);
+                        cbs.forEach(function (t) {
+                            t.checked = false;
+                        })
+                        optPanel.style.overflow = "hidden"
+
+                    }
+                })], {
+                    class: "optPanel"
+                })
                 switch (resultType) {
                     case "colgroup":
                         _.colgroup(colgroup);
@@ -972,9 +1048,9 @@
                         })
                         break;
                     default:
-                        return _.div(_.table([_.colgroup(colgroup), _.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
+                        return _.div([_.table([_.colgroup(colgroup), _.thead(thead), _.tbody(tbody), _.tfoot(tfoot)], {
                             tablename: tname
-                        }), {
+                        }), optPanel], {
                             class: "dataintable",
                             tablename: tname
                         });
@@ -1139,69 +1215,68 @@
                 //     cols: "80",
                 //     rows: "5",
                 // })
+                var _this = this;
                 var textarea = _.div("", {
                     contentEditable: "plaintext-only",
                     class: "textarea",
                     // placeholder:"这里输入sql"
-                })
-                var _this = this;
-
-                //sql语法高亮
-                _.addEvent("blur", textarea, function (e) {
-                    textarea.innerHTML =
-                        _this.hightlightSql(_this.getTextareaValue(textarea))
-                })
-
-                var btn = _.div("执行sql", {
-                    class: "btn exesql"
-                })
-
-                var _this = this;
-                _.addEvent("click", btn, function (e) {
-                    var bd = document.querySelector(".slide .bd")
-                    bd.innerHTML = "";
-                    var options = {}
-                    var sql = _this.getSelectedText(textarea) //textarea.value
-                    if (!sql) {
-                        bd.innerHTML = "请输入sql"
-                        return;
+                }, {
+                    blur: function (e) { //sql语法高亮
+                        textarea.innerHTML =
+                            _this.hightlightSql(_this.getTextareaValue(textarea))
                     }
+                })
 
-
-                    var tnames = [];
-                    sql.split(";").forEach(function (t) {
-                        //查询语句
-                        if ((/select\s[\s\S]+from\s/i).test(t)) {
-                            var tname = ((t.match(/from\s(\S+)\s?/i) || [])[1] || "sqlcmd").toUpperCase();
-                            // console.log(tname)
-                            _this.exe({
-                                sql: t,
-                                tbl: tname
-                            }, function (rs, tbl) {
-                                bd.appendChild(_.li(_this.createGrid(tbl, rs, options)))
-                                tnames.push(tname)
-                                _this.activeHd(tnames)
-                            }, function (errormsg) {
-                                bd.appendChild(document.createTextNode(errormsg))
-                                _this.activeHd("")
-                            })
-                        } else {
-                            //非查询语句
-                            _this.exe({
-                                sql: t,
-                                tbl: ""
-                            }, function () {
-                                console.log("ok")
-
-                            }, function (errormsg) {
-                                bd.appendChild(document.createTextNode(errormsg))
-                            })
+                var btn = _.btn("执行sql", {
+                    class: "exesql"
+                }, {
+                    click: function (e) {
+                        var bd = document.querySelector(".slide .bd")
+                        bd.innerHTML = "";
+                        var options = {}
+                        var sql = _this.getSelectedText(textarea) //textarea.value
+                        if (!sql) {
+                            bd.innerHTML = "请输入sql"
+                            return;
                         }
-                    })
 
-                });
+
+                        var tnames = [];
+                        sql.split(";").forEach(function (t) {
+                            //查询语句
+                            if ((/select\s[\s\S]+from\s/i).test(t)) {
+                                var tname = ((t.match(/from\s(\S+)\s?/i) || [])[1] || "sqlcmd").toUpperCase();
+                                // console.log(tname)
+                                _this.exe({
+                                    sql: t,
+                                    tbl: tname
+                                }, function (rs, tbl) {
+                                    bd.appendChild(_.li(_this.createGrid(tbl, rs, options)))
+                                    tnames.push(tname)
+                                    _this.activeHd(tnames)
+                                }, function (errormsg) {
+                                    bd.appendChild(document.createTextNode(errormsg))
+                                    _this.activeHd("")
+                                })
+                            } else {
+                                //非查询语句
+                                _this.exe({
+                                    sql: t,
+                                    tbl: ""
+                                }, function () {
+                                    console.log("ok")
+
+                                }, function (errormsg) {
+                                    bd.appendChild(document.createTextNode(errormsg))
+                                })
+                            }
+                        })
+
+                    }
+                })
+
                 var checkboxs = this.gridConfig.map(function (t) {
-                    return _.createCheckbox(t)
+                    return _.checkbox(t)
                 })
                 var btnGroup = _.div([btn].concat(checkboxs), {
                     class: "sqlcmd-btn-group"
