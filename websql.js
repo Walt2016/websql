@@ -212,9 +212,9 @@
                 }
             }
             append(text)
-            if (tag.toLowerCase() === "input") {
+            // if (tag.toLowerCase() === "input") {
 
-            }
+            // }
             for (var key in props) {
                 if (tag.toLowerCase() === "input" && key === "checked") {
                     if (props[key]) {
@@ -396,14 +396,23 @@
                 var _this = this;
                 _this.sqls = [];
                 this.db.transaction(function (tx) {
+                    var typs=[];
                     var flds = _this.tbls[tbl].map(function (t) {
+                        typs.push(t.type)
                         return t.prop ? t.prop : t;
                     });
                     console.log(flds)
                     rs.forEach(function (r) {
                         var sql = `INSERT INTO ${tbl}(${flds}) values(${new Array(flds.length).fill("?")})`;
-                        var vs = flds.map(function (t) {
-                            return r[t]
+                        var vs = flds.map(function (t,i) {
+                            switch(typs[i]){
+                                // case "string":
+                                // break;
+                                case "number":
+                                return r[t]
+                                default:
+                                return "'"+r[t]+"'"
+                            }
                         });
                         _this.sqls.push({
                             tbl: tbl,
