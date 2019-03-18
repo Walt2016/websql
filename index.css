@@ -291,21 +291,25 @@ a {
 .input-group {
     display: flex;
 }
-.input-group .label{
+
+.input-group .label {
     margin-left: 4px;
 }
 
-.sqlcmd {
+.sqlcmd,
+.htmlcmd {
     display: flex;
     margin-left: 10px;
 }
 
-.sqlcmd .red{
+.sqlcmd .red {
     color: red;
 }
-.sqlcmd .blue{
+
+.sqlcmd .blue {
     color: blue;
 }
+
 
 .sqlcmd .textarea {
     border: 1px solid #3F3F3F;
@@ -327,6 +331,23 @@ a {
 
 .sqlcmd-btn-group>div {
     margin-bottom: 10px;
+}
+
+.htmlcmd .htmlarea {
+    border: 1px solid #3F3F3F;
+    width: 500px;
+    height: 200px;
+    overflow-y: auto;
+}
+
+.htmlcmd .htmlarea td {
+    outline: 1px solid #3F3F3F;
+}
+
+.htmlcmd .htmlarea tr:first-child td {
+    background: #F5F5F5;
+    font-weight: bolder;
+    white-space: nowrap;
 }
 
 .dataintable table td.number {
@@ -371,7 +392,7 @@ table thead th[seq='asc'] .icon::before {
     content: "\2191";
 }
 
-.table-fixed-body{
+.table-fixed-body {
     height: 400px;
     overflow-y: auto;
 }
@@ -571,7 +592,7 @@ table thead th[seq='asc'] .icon::before {
     border: none;
 }
 
-.dataintable{
+.dataintable {
     position: relative;
 }
 
@@ -667,6 +688,7 @@ tr.notsupported {
     /* box-sizing: border-box; */
     /* background-color: #fff; */
 }
+
 .checkbox:checked {
     background-image: url(sprite/cos-201901241518.svg);
     background-color: #3F3F3F;
@@ -674,7 +696,7 @@ tr.notsupported {
     background-position: 98.66% 53.03%;
     background-size: 1700% 1514.2857142857142%;
     background-repeat: no-repeat;
-    
+
 }
 
 .dataintable .optPanel {
@@ -696,4 +718,69 @@ tr.notsupported {
     height: auto;
     margin: auto;
     color: #ffffff;
+}
+
+
+
+.tabs {
+    width: 100%;
+    max-width: 600px;
+    margin: 50px auto;
+}
+
+.tabs input {
+    opacity: 0;
+}
+
+.tabs label {
+    cursor: pointer;
+    background: -webkit-linear-gradient(#666, #555);
+    color: #eee;
+    border-radius: 5px 5px 0 0;
+    padding: 1.5% 3%;
+    float: left;
+    margin-right: 2px;
+    font: italic 1em cambria;
+}
+
+.tabs label:hover {
+    background: -webkit-linear-gradient(#777, #666);
+}
+
+input:checked+label {
+    background: #fff;
+    color: #333;
+}
+
+.tabs input:nth-of-type(1):checked~.panels .panel:first-child,
+.tabs input:nth-of-type(2):checked~.panels .panel:nth-child(2),
+.tabs input:nth-of-type(3):checked~.panels .panel:nth-child(3),
+.tabs input:nth-of-type(4):checked~.panels .panel:last-child {
+    opacity: 1;
+    -webkit-transition: .3s;
+}
+
+.tabs .panels {
+    float: left;
+    clear: both;
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border-radius: 0 10px 10px 10px;
+    min-height: 315px;
+}
+
+.tabs .panel {
+    width: 100%;
+    opacity: 0;
+    position: absolute;
+    background: #fff;
+    border-radius: 0 10px 10px 10px;
+    padding: 4%;
+    box-sizing: border-box;
+}
+
+.tabs .panel h2 {
+    margin: 0;
+    font-family: Arial;
 }

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CMD</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        body {
+	font-family: Cambria, Arial;
+	background: #333;
+}
+</style>
+</head>
+
+<body>
+
+    <article class="tabs">
+
+        <input checked id="one" name="tabs" type="radio">
+        <label for="one">Tab One</label>
+
+        <input id="two" name="tabs" type="radio" value="Two">
+        <label for="two">Tab Two</label>
+
+        <input id="three" name="tabs" type="radio">
+        <label for="three">Tab Three</label>
+
+        <input id="four" name="tabs" type="radio">
+        <label for="four">Tab Four</label>
+
+        <div class="panels">
+
+            <div class="panel">
+                <h2>This is Panel One</h2>
+                <div class="htmlcmd">
+                        <div contentEditable="true" class="htmlarea"></div>
+                    </div>
+            </div>
+
+            <div class="panel">
+                <h2>This is Panel Two</h2>
+                <p><div class="sqlcmd">
+                        <div contentEditable="plaintext-only" class="textarea"></div>
+                    </div></p>
+            </div>
+
+            <div class="panel">
+                <h2>This is Panel Three</h2>
+                <p>Nam sodales, mi eu convallis adipiscing, ligula justo consectetur tellus, tincidunt vestibulum
+                    tortor elit a augue. Ut elementum ultricies orci, vel luctus neque varius in. Phasellus turpis
+                    nunc, eleifend ac fringilla at, malesuada in eros.</p>
+
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris vel leo sem. Sed nec quam sit amet
+                    lorem volutpat ullamcorper ut sed massa. Sed vel felis velit. Nullam et turpis sed dui auctor
+                    vehicula quis a dui.</p>
+
+                <p>Aliquam vitae leo et sapien volutpat accumsan quis eget turpis. Etiam ac metus vitae purus semper
+                    pretium. Curabitur id nisl nisl. Cras ut massa sed dolor ullamcorper consequat ut sed dolor.</p>
+            </div>
+
+            <div class="panel">
+                <h2>This is Panel Four</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris vel leo sem. Sed nec quam sit amet
+                    lorem volutpat ullamcorper ut sed massa. Sed vel felis velit. Nullam et turpis sed dui auctor
+                    vehicula quis a dui.</p>
+
+                <p>Aliquam vitae leo et sapien volutpat accumsan quis eget turpis. Etiam ac metus vitae purus semper
+                    pretium. Curabitur id nisl nisl. Cras ut massa sed dolor ullamcorper consequat ut sed dolor.</p>
+            </div>
+
+        </div>
+
+    </article>
+
+
+
+
+
+    
+    <div class="btn">解析</div>
+    <script>
+        var btn = document.querySelector(".btn")
+        btn.onclick = function () {
+            var htmlarea = document.querySelector(".htmlarea")
+
+            var html = htmlarea.innerHTML
+
+            //去掉table无关属性
+            html = html.replace(/<(\/?)([a-zA-Z]+)[^><]*>/g, function (m, sprit, tag) {
+                if (["colgroup", "col"].indexOf(tag) > -1) {
+                    return ""
+                }
+                return sprit ? "<" + sprit + tag + ">" : "<" + tag + ">"
+            })
+            htmlarea.innerHTML = html
+
+            var flds = []
+            var sqlArr = []
+            var index = 0
+            var tbl = "test"
+            html.replace(/<tr>([\s\S]*?)<\/tr>/g, function (m, row) {
+                var vals = []
+                if (index === 0) { //第一行作为表字段
+                    row.replace(/<td>([\s\S]*?)<\/td>/g, function (r, td) {
+                        flds.push(td)
+                    })
+                    sqlArr.push(`CREATE TABLE IF NOT EXISTS ${tbl}(${flds})`)
+                } else {
+                    row.replace(/<td>([\s\S]*?)<\/td>/g, function (r, td) {
+                        vals.push("'" + td + "'")
+                    })
+                    if (vals.length > 0)
+                        sqlArr.push(`insert into ${tbl}(${flds}) values(${vals})`)
+                }
+                index++;
+            })
+            var textarea = document.querySelector(".textarea")
+            textarea.innerHTML = sqlArr.join(";\n")
+        }
+    </script>
+
+</body>
+
+</html>
