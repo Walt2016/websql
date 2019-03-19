@@ -668,7 +668,7 @@
                     });
                     console.log(flds)
                     rs.forEach(function (r) {
-                        var sql = `INSERT INTO ${tbl}(${flds}) values(${new Array(flds.length).fill("?")})`;
+                        // var sql = `INSERT INTO ${tbl}(${flds}) values(${new Array(flds.length).fill("?")})`;
                         var vs = flds.map(function (t, i) {
                             switch (typs[i]) {
                                 // case "string":
@@ -683,16 +683,16 @@
                             tbl: tbl,
                             sql: `INSERT INTO ${tbl}(${flds}) values(${vs})`
                         })
-                        tx.executeSql(sql, vs, function (tx, result) {
-                            console.log("insert ok")
-                            // console.log(tx, result)
+                        // tx.executeSql(sql, vs, function (tx, result) {
+                        //     console.log("insert ok")
+                        //     // console.log(tx, result)
 
-                        }, function (tx, error) {
-                            console.log("insert fail")
-                            // console.log(error.message)
-                            // throw new Error(error);
-                            _this.errorCall && _this.errorCall(error.message)
-                        });
+                        // }, function (tx, error) {
+                        //     console.log("insert fail")
+                        //     // console.log(error.message)
+                        //     // throw new Error(error);
+                        //     _this.errorCall && _this.errorCall(error.message)
+                        // });
                     })
                     //callback && callback(tbl);
                     _this.setSqlcmd.call(_this)
@@ -1557,8 +1557,14 @@
                                     sql: t,
                                     tbl: ""
                                 }, function () {
-                                    console.log("ok")
+                                    // console.log("ok")
+                                    // bd.appendChild(document.createTextNode("ok"))
 
+                                    bd.appendChild(_.div(t+";",{
+                                        class:"sql"
+                                    })
+)
+                                    
                                 }, function (errormsg) {
                                     bd.appendChild(document.createTextNode(errormsg))
                                 })
