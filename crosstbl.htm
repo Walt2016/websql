@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>交叉表</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+        <div class="tools"></div>
+        <div class="demo"></div>
+    <script src="websql.js"></script>
+
+    <script>
+        //special agreement
+        var tp_sa = [{
+            prop: "sa_code",
+            label: "特约代码",
+            type: "string",
+            pk:true
+        },
+        {
+            prop: "risk_code",
+            label: "险种代码",
+            type: "string"
+        },
+        {
+            prop: "sa_text",
+            label: "特约内容",
+            type: "string"
+        }]
+
+        //dimension
+        var tp_dim=[{
+            prop: "dim_id",
+            label: "维度编码",
+            type: "string",
+            pk:true
+        },
+        {
+            prop: "dim_name",
+            label: "维度名称",
+            type: "string"
+        },
+        {
+            prop: "dim_level",
+            label: "维度优先级",
+            type: "string"
+        },
+        {
+            prop: "dim_type",
+            label: "维度类型",
+            type: "string"
+        }
+
+        ]
+
+        //交叉表
+        var tp_sa_dim=[
+        {
+            prop: "sa_code",
+            label: "特约代码",
+            type: "string"
+        },
+        {
+            prop: "dim_id",
+            label: "维度编码",
+            type: "string"
+        }
+
+        ]
+
+        //交叉值表
+        var tp_sa_dim_val=[
+        {
+            prop: "sa_code",
+            label: "特约代码",
+            type: "string"
+        },
+        {
+            prop: "dim_id",
+            label: "维度编码",
+            type: "string"
+        },
+        {
+            prop: "dim_val",
+            label: "维度值",
+            type: "string"
+        }
+        ]
+
+        var tbls={
+            tp_sa:tp_sa,
+            tp_dim:tp_dim,
+            tp_sa_dim:tp_sa_dim,
+            tp_sa_dim_val:tp_sa_dim_val
+        }
+
+        var ws = websql({
+            tbls: tbls,
+            // data: data,
+        })
+               // console.log(ws)
+               var tools=document.querySelector(".tools")
+        tools.appendChild(ws.createBtns());
+        tools.appendChild(ws.createSqlcmd())
+        // tools.appendChild(ws.createExeSqlHistory())
+        var demo=document.querySelector(".demo")
+        demo.appendChild(ws.createSlide())
+    </script>
+</body>
+
+</html>

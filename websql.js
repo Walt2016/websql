@@ -302,6 +302,249 @@
     //     }
     // }
 
+    //日期
+    var _time = _.time = function () {
+        function Time(dateValue) {
+            if (!(this instanceof Time)) return new Time(dateValue);
+            var t = this.date = this.constructor.toDate(dateValue);
+            this.year = t.getFullYear();
+            this.month = t.getMonth() + 1;
+            this.day = t.getDate(); //日期 day_of_month
+            this.hour = t.getHours();
+            this.minute = t.getMinutes();
+            this.second = t.getSeconds();
+            this.msecond = t.getMilliseconds(); //毫秒 
+            this.day_of_week = t.getDay() === 0 ? 7 : t.getDay(); //  星期几   What day is today
+            // 中国的概念是周一是每周的开始, 周日12pm是每周结束.
+
+            this.time = t.getTime();
+            this.quarter = (t.getMonth() + 3) / 3 << 0; // //季度 
+        }
+        return _.createClass(Time, {
+            // 转化为指定格式的String 
+            // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符， 
+            // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字) 
+            // 例子： 
+            // (new Date()).format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423 
+            // (new Date()).format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18 
+            format: function (fmt) {
+                var self = this;
+                fmt = fmt || "yyyy-MM-dd hh:mm:ss.S";
+                var date = this.date
+                var o = {
+                    "y+|Y+": this.year, //年份4位特殊处理
+                    "M+": this.month,
+                    "d+|D+": this.day,
+                    "h+|H+": this.hour,
+                    "m+": this.minute,
+                    "s+": this.second,
+                    "q+": this.quarter,
+                    "S": this.msecond,
+                };
+                Object.keys(o).forEach(function (k, i) {
+                    var v = '' + o[k];
+                    fmt = fmt.replace(new RegExp(k, 'g'), function (t) {
+                        return i === 0 ? v.substr(4 - t.length) : t[1] ? self.constructor.zerofill(v) : v;
+                    })
+                });
+                return fmt;
+            },
+            //设置当前时间  ，保持当前日期不变
+            set: function (str) {
+                if (this.constructor.isTimeString(str)) str = this.format("yyyy-MM-dd") + " " + str;
+                return this.constructor.toDate(str);
+            },
+            //当前时间
+            setCurTime: function () {
+                return this.set(this.constructor().format("HH:mm:ss"));
+            },
+            add: function (interval, number, date) {
+                return this.constructor.add(interval, number, date)
+            },
+            utc: function () {
+                return Date.UTC(this.year, this.month - 1, this.day, this.hour, this.minute, this.second, this.msecond)
+            },
+            //时区
+            zone: function () {
+                return (this.time - this.utc()) / 3600000;
+            },
+            diff: function (interval, date1) {
+                return this.constructor.diff(interval, this.date, date1)
+            },
+
+            //
+            // weekOfMonth: function() {
+
+            // },
+
+            //一年中的第几周 WEEK_OF_Year WEEKNUM
+            // 以周一为周首，周日为周末  以完整的一周计算，可能第一周不足7天
+            //此处按7天一周计算 
+            week: function (dateStr) {
+                var day_of_year = 0;
+                var d = dateStr ? this.constructor(dateStr) : this;
+                if (!d) return "";
+                var years = d.year,
+                    month = d.month - 1,
+                    day = d.day,
+                    days = [31, 28, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                //4年1闰
+                if (Math.round(years / 4) === years / 4) days[1] = 29;
+                days.forEach(function (t, i) {
+                    if (i <= month) day_of_year += day + (i === 0 ? 0 : days[i - 1]);
+                });
+                return Math.ceil(day_of_year / 7);
+            }
+        }, {
+            //_.time.toDate("09:30:00")
+            //_.time.toDate(timeRange[0].begin.format("yyyy-MM-dd") + " " + (new Date()).format(" HH:mm:ss"))
+            // 指定时间  hh:mm:ss     默认当天日期  
+            // 指定日期  yyyy-MM-dd   默认时间 00:00:00  (非当前时间)  
+            toDate: function (str) {
+                if (_.type(str) === "date") {
+                    return new Date(+str); //new
+                } else if (_.type(str) == null) {
+                    return new Date();
+                } else if (/^\d*$/.test(str)) {
+                    return new Date(+str);
+                } else if (_.type(str) == "string") {
+                    if (this.isTimeString(str)) str = this().format("yyyy-MM-dd") + " " + str;
+                    return new Date(Date.parse(str.replace(/-/g, "/")));
+                }
+                return str;
+            },
+            // 时间格式 hh:mm:ss 
+            isTimeString: function (str) {
+                return /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.test(str);
+            },
+
+            set: function (date, time) {
+                return this.toDate(time ? date + ' ' + time : date);
+                // var self = this;
+
+                // if (this.isTimeString(time)) {
+                //     //时间补0
+                //     time = time.replace(/\d{1,2}/g, function(t) {
+                //         return self.zerofill(t)
+                //     });
+                //     // str.replace(reg, function(t, h, m, s) {
+                //     //     console.log(t + ":----")
+                //     //     console.log("h:" + h)
+                //     //     console.log("m:" + m)
+                //     //     console.log("s:" + s)
+                //     //     return self.zerofill(t)
+                //     // })
+                //     //(new Date()).format("yyyy-MM-dd")
+                //     date += ' ' + time;
+                // }
+
+                // return new Date(Date.parse(date.replace(/-/g, "/")));
+            },
+            //补0
+            zerofill: function (n) {
+                n = '' + n;
+                return n[1] ? n : '0' + n;
+            },
+            //时长 格式化
+            durationFormat: function (duration) {
+                var self = this;
+                if (typeof duration !== 'number' || duration < 0) return "00:00";
+                var hour = duration / 3600 << 0;
+                duration %= 3600;
+                var minute = duration / 60 << 0;
+                duration %= 60;
+                var second = duration << 0;
+                var arr = [minute, second];
+                if (hour > 0) arr.unshift(hour);
+                return arr.map(function (n) {
+                    return self.zerofill(n)
+                }).join(':');
+            },
+
+            //映射短名字
+            shortNameMap: function (s) {
+                s = ('' + s).toLowerCase();
+                var m = {
+                    "y": "year",
+                    "m": "month",
+                    "d": "day",
+                    "w": "week",
+                    "h": "hour",
+                    "n": "minute",
+                    "min": "minute",
+                    "s": "second",
+                    "l": "msecond",
+                    "ms": "msecond",
+                };
+                return s in m ? m[s] : s;
+            },
+            //时间间隔
+            diff: function (interval, date1, date2) {
+                var t1 = this(date1),
+                    t2 = this(date2),
+                    _diff = t1.time - t2.time,
+                    seconds = 1000,
+                    minutes = seconds * 60,
+                    hours = minutes * 60,
+                    days = hours * 24,
+                    years = days * 365;
+
+                switch (this.shortNameMap(interval)) {
+                    case "year":
+                        result = t1.year - t2.year; //_diff/years
+                        break;
+                    case "month":
+                        result = (t1.year - t2.year) * 12 + (t1.month - t2.month);
+                        break;
+                    case "day":
+                        result = Math.round(_diff / days);
+                        break;
+                    case "hour":
+                        result = Math.round(_diff / hours);
+                        break;
+                    case "minute":
+                        result = Math.round(_diff / minutes);
+                        break;
+                    case "second":
+                        result = Math.round(_diff / seconds);
+                        break;
+                    case "msecond":
+                        result = _diff;
+                        break;
+                    case "week":
+                        result = Math.round(_diff / days) % 7;
+                        break;
+                    default:
+                        result = "invalid";
+                }
+                return result;
+            },
+            add: function (interval, number, date) {
+                var date = this.toDate(date);
+                switch (this.shortNameMap(interval)) {
+                    case "year":
+                        return new Date(date.setFullYear(date.getFullYear() + number));
+                    case "month":
+                        return new Date(date.setMonth(date.getMonth() + number));
+                    case "day":
+                        return new Date(date.setDate(date.getDate() + number));
+                    case "week":
+                        return new Date(date.setDate(date.getDate() + 7 * number));
+                    case "hour":
+                        return new Date(date.setHours(date.getHours() + number));
+                    case "minute":
+                        return new Date(date.setMinutes(date.getMinutes() + number));
+                    case "second":
+                        return new Date(date.setSeconds(date.getSeconds() + number));
+                    case "msecond":
+                        return new Date(date.setMilliseconds(date.getMilliseconds() + number));
+                }
+                return date;
+            }
+
+        })
+    }();
+
 
     var _websql = function () {
         var Websql = function (options) {
@@ -323,6 +566,25 @@
             );
             //表结构
             this.tbls = options.tbls || [];
+
+            //日期表
+            this.tbls.sys_log = [{
+                    prop: "time",
+                    label: '时间',
+                    type: "date",
+                    format: "yyyy-mm-dd hh:mm:ss"
+                },
+                {
+                    prop: "sql",
+                    label: 'SQL',
+                    type: "sql"
+                },
+                {
+                    prop: "duration",
+                    label: '执行时间',
+                    type: "number"
+                }
+            ]
             //表数据
             this.data = options.data;
             //所有数据
@@ -370,10 +632,13 @@
                 var tbls = tbls || this.tbls;
                 var _this = this;
                 _this.sqls = [];
+
+
                 this.db.transaction(function (tx) {
                     for (var t in tbls) {
                         var flds = tbls[t].map(function (t) {
-                            return t.prop ? t.prop : t;
+
+                            return (t.prop ? t.prop : t) + (t.pk ? " unique" : "");
                         });
                         var sql = `CREATE TABLE IF NOT EXISTS ${t}(${flds})`
                         console.log(sql)
@@ -381,13 +646,13 @@
                             tbl: t,
                             sql: sql
                         })
-                        tx.executeSql(sql, [], function (ctx, result) {
-                            console.log("创建表成功 " + t);
-                        }, function (tx, error) {
-                            console.error('创建表失败:' + t + error.message);
-                            // throw new Error(error);
-                            _this.errorCall && _this.errorCall(error.message)
-                        })
+                        // tx.executeSql(sql, [], function (ctx, result) {
+                        //     console.log("创建表成功 " + t);
+                        // }, function (tx, error) {
+                        //     console.error('创建表失败:' + t + error.message);
+                        //     // throw new Error(error);
+                        //     _this.errorCall && _this.errorCall(error.message)
+                        // })
                     }
                     _this.setSqlcmd.call(_this)
                 });
@@ -396,7 +661,7 @@
                 var _this = this;
                 _this.sqls = [];
                 this.db.transaction(function (tx) {
-                    var typs=[];
+                    var typs = [];
                     var flds = _this.tbls[tbl].map(function (t) {
                         typs.push(t.type)
                         return t.prop ? t.prop : t;
@@ -404,14 +669,14 @@
                     console.log(flds)
                     rs.forEach(function (r) {
                         var sql = `INSERT INTO ${tbl}(${flds}) values(${new Array(flds.length).fill("?")})`;
-                        var vs = flds.map(function (t,i) {
-                            switch(typs[i]){
+                        var vs = flds.map(function (t, i) {
+                            switch (typs[i]) {
                                 // case "string":
                                 // break;
                                 case "number":
-                                return r[t]
+                                    return r[t]
                                 default:
-                                return "'"+r[t]+"'"
+                                    return "'" + r[t] + "'"
                             }
                         });
                         _this.sqls.push({
@@ -429,7 +694,7 @@
                             _this.errorCall && _this.errorCall(error.message)
                         });
                     })
-                    callback && callback(tbl);
+                    //callback && callback(tbl);
                     _this.setSqlcmd.call(_this)
                 });
             },
@@ -443,7 +708,7 @@
                         tbl: t
                     })
                 }
-                this.exe(_this.sqls, callback)
+                // this.exe(_this.sqls, callback)
                 _this.setSqlcmd.call(_this)
                 // var del = function (tx, t) {
                 //     var sql = `DELETE FROM ${t}`
@@ -478,6 +743,18 @@
                 //         console.error('删除表失败:' + tbl + error.message);
                 //     })
                 // })
+            },
+            drop: function () {
+                var tbls = tbls == null || tbls.length == 0 ? this.tbls : tbls;
+                var _this = this;
+                _this.sqls = []
+                for (var t in tbls) {
+                    _this.sqls.push({
+                        sql: `drop table ${t}`,
+                        tbl: t
+                    })
+                }
+                _this.setSqlcmd.call(_this)
             },
             //查询
             list: function (tbls, options, callback) {
@@ -703,6 +980,9 @@
                     key: "list",
                     val: "列表"
                 }, {
+                    key: "drop",
+                    val: "删表"
+                }, {
                     key: "log",
                     val: "日志"
                 }].map((t) => {
@@ -730,7 +1010,7 @@
                                 _.queryAll(".dataintable").forEach(function (t) {
                                     tbls.push(t.getAttribute("tablename"))
                                 })
-                                for (var tbl in data) {
+                                for (var tbl in _this.data) {
                                     console.log(tbl)
 
                                     // if(tbls.indexOf(tbl)>=0){
@@ -739,7 +1019,7 @@
 
                                     // }
 
-                                    _this.insert(tbl, data[tbl])
+                                    _this.insert(tbl, _this.data[tbl])
 
                                     // _this.insert(tbl, data[tbl], tbls.indexOf(tbl) >= 0 ? _this.reflashList.bind(_this) : null)
 
@@ -798,8 +1078,9 @@
             },
             //sql关键字高亮
             hightlightSql: function (sql) {
-                var keys = ["select", "from", "where", "desc", "asc", "on", "delete", "values", "if", "not", "EXISTS",
-                    "insert\\s+into", "create\\s+table",
+                var keys = ["select", "from", "where", "desc", "asc", "on", "delete", "values",
+                    "if", "not", "EXISTS", "unique",
+                    "insert\\s+into", "create\\s+table", "drop\\s+table",
                     "order\\s+by", "group\\s+by", "left\\s+join", "right\\s+join", "inner\\s+join"
                 ]
                 var reg1 = new RegExp("(" + keys.join("|") + ")", "gi");
@@ -854,11 +1135,12 @@
                 return keys.map(function (t, i) {
                     var fld = tbl.filter(function (f) {
                         return f.prop === t
-                    })[0]
+                    })[0];
                     return {
                         prop: t,
                         label: fld && fld.label || t,
-                        type: fld && fld.type || typs[i]
+                        type: fld && fld.type || typs[i],
+                        format: fld && fld.format || ""
                     }
                 })
 
@@ -897,7 +1179,8 @@
                             case "date":
                                 t = [_.createEle("i", "", {
                                     class: "date"
-                                }), t]
+                                }), fmts[j] ? _time(t).format(fmts[j]) : t]
+
                                 break;
                         }
                         return _.td(t, {
@@ -914,6 +1197,7 @@
                 }
                 //类型
                 var typs = [];
+                var fmts = [];
                 var offset = 0;
                 if (config.check) offset++;
                 if (config.seq) offset++;
@@ -942,6 +1226,7 @@
                 var thead =
                     tbl.map(function (t) {
                         var typ = t.type ? t.type : "string";
+                        var fmt = t.format ? t.format : "";
                         var lable = t.label ? t.label : t;
                         var prop = t.prop ? t.prop : t;
                         var seq = "";
@@ -956,6 +1241,7 @@
                         if (!hide) {
                             if (typ === "number" && config.statistic) showFoot = true;
                             typs.push(typ);
+                            fmts.push(fmt);
                         }
                         return hide ? "" : _.th([_.div(lable, {
                             class: "text"

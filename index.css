@@ -273,6 +273,14 @@ a {
     margin-right: 10px;
     color: #ccc;
 }
+.btn-group .btn:nth-child(6)::before {
+    content: "\2465";
+    width: 15px;
+    height: 15px;
+    /* font-size: 12px; */
+    margin-right: 10px;
+    color: #ccc;
+}
 
 .btn-group {
     flex-direction: column
@@ -616,6 +624,9 @@ table thead th[seq='asc'] .icon::before {
     vertical-align: text-top;
     padding: 6px 15px 6px 6px;
     border: 1px solid #aaa;
+}
+.dataintable table td.date,.dataintable table th{
+    white-space: nowrap;
 }
 
 .dataintable table tr:nth-child(odd) {
