@@ -301,6 +301,18 @@
             return _.createEle("img", "", {
                 src: options
             })
+        },
+        //遍历dom，操作
+        traversalWidth:function(el){
+            var children=el.children,len=children.length;
+            for(var i=0;i<len;i++){
+                var t=children[i]
+                if(parseInt(getComputedStyle(t)["width"]) >1000) {
+                    // t.setAttribute("witdh","100%")
+                    t.style.width="100%"                    
+                    _.traversalWidth(t)
+                }
+            }
         }
     };
     ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i", "span", "colgroup", "col", "a"].forEach(function (t) {
@@ -561,6 +573,7 @@
         })
     }();
 
+
     //菜单
     var _nav = function () {
         var Nav = function (options) {
@@ -602,7 +615,7 @@
                 2: "index-nav-frame-line-li"
             }
             var checkActive = function (t) {
-                if (url.indexOf(t.url) >= 0) {
+                if (url.indexOf(encodeURI(t.url)) >= 0) {
                     return true;
                 }
                 var children = t.children

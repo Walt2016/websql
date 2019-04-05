@@ -60,7 +60,23 @@ var _menu = [{
     },
     {
         label: "咨询管理",
-        url: "prepareQuery7.html"
+        url: "viewConsultantProject.html",
+        // url: "prepareQuery7.html",
+        children: [{
+            label: "咨询项目详情",
+            url: "viewConsultantProject.html",
+        },
+        {
+            label: "服务范围及计划确定",
+            url: "prepareNodeCodeTaskQuery.html",
+        },
+        {
+            label: "项目经理执行维护",
+            url: "businessExecManagement.html",
+        },
+        
+
+    ]
     },
     
     {
