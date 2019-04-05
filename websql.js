@@ -285,9 +285,25 @@
             str += el.id ? "#" + el.id : "";
             str += el.className ? "." + el.className.replace(/\s+/g, ".") : "";
             return str;
+        },
+        inStyle: function (obj) {
+            return ["width", "height", "top", "left"].map(function (t) {
+                return obj[t] ? t + ":" + obj[t] : null
+            }).join(";")
+            // return JSON.stringify(obj).replace(/\"/g,"").replace(/,/g,";").replace(/{/,"").replace(/}/,"")
+        },
+        img: function (options) {
+            if (_.type(options) === "object") {
+                return _.createEle("img", "", _.extend({
+                    src: options.url
+                }, options))
+            }
+            return _.createEle("img", "", {
+                src: options
+            })
         }
     };
-    ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i", "span", "colgroup", "col"].forEach(function (t) {
+    ["div", "ul", "li", "tbody", "tfoot", "thead", "td", "tr", "th", "table", "textarea", "i", "span", "colgroup", "col", "a"].forEach(function (t) {
         _[t] = function (text, props, events) {
             return _.createEle(t, text, props, events)
         }
@@ -545,6 +561,109 @@
         })
     }();
 
+    //菜单
+    var _nav = function () {
+        var Nav = function (options) {
+            if (!(this instanceof Nav)) return new Nav(options);
+
+            var options = this.options = _.extend({
+                menu: [{
+                        label: "配置管理",
+                        url: "github.com",
+                        children: [{
+                            label: "配置管理1",
+                            url: "g.cn"
+                        }]
+                    },
+                    {
+                        label: "配置管理2",
+                        children: [{
+                            label: "配置管理21"
+                        }]
+                    }
+                ],
+                info: {
+                    text: ""
+                }
+            }, options)
+            var el = _.query(options.el);
+            var menu = options.menu;
+            var logo = options.logo;
+            var info = options.info;
+            var genLink = function (t) {
+                return t.url ? _.a(t.label, {
+                    href: t.url
+                }) : t.label
+            }
+            var url = location.href;
+            var cls = {
+                0: "index-nav-frame-line",
+                1: "index-nav-frame-line-center",
+                2: "index-nav-frame-line-li"
+            }
+            var checkActive = function (t) {
+                if (url.indexOf(t.url) >= 0) {
+                    return true;
+                }
+                var children = t.children
+                if (children) {
+                    for (var i = 0; i < children.length; i++) {
+                        if (checkActive(children[i])) {
+                            return true
+                        }
+                    }
+                }
+            }
+
+            var lines = menu.map(function (t, i) {
+                var children = t.children
+                var lineCenter = [];
+                if (children) {
+                    var lis = children.map(function (t) {
+                        return _.div(genLink(t), {
+                            class: cls["2"]
+                        })
+                    })
+                    lineCenter = _.div(lis, {
+                        class: cls["1"]
+                    })
+                }
+
+                // var active = url.indexOf(t.url) >= 0 ? " active" : "";
+                var active=checkActive(t)? " active" : "";
+
+                return _.div([genLink(t)].concat(lineCenter), {
+                    class: cls["0"] + active,
+                    tabindex: "-1"
+                }, {
+                    click: function (e) {
+                        _.queryAll("." + cls["0"]).forEach(function (t) {
+                            t.className = cls["0"]
+                        })
+                        this.className = cls["0"] + " active"
+                    }
+                })
+            })
+            var logo = _.div(_.img(logo), {
+                class: "nav-small",
+                style: _.inStyle(logo),
+                tabindex: "-1"
+            })
+
+            var info = _.div(info.text, {
+                class: "index-nav-info"
+            })
+
+            var navIndex = _.div([logo].concat(lines).concat([info]), {
+                class: "index-nav"
+            })
+            el.appendChild(navIndex)
+        }
+        return _.createClass(Nav, {
+
+        });
+    }();
+
 
     var _websql = function () {
         var Websql = function (options) {
@@ -628,6 +747,7 @@
 
         return _.createClass(Websql, {
             _: _,
+            nav: _nav,
             createTbls: function (tbls) {
                 var tbls = tbls || this.tbls;
                 var _this = this;
@@ -1560,11 +1680,10 @@
                                     // console.log("ok")
                                     // bd.appendChild(document.createTextNode("ok"))
 
-                                    bd.appendChild(_.div(t+";",{
-                                        class:"sql"
-                                    })
-)
-                                    
+                                    bd.appendChild(_.div(t + ";", {
+                                        class: "sql"
+                                    }))
+
                                 }, function (errormsg) {
                                     bd.appendChild(document.createTextNode(errormsg))
                                 })

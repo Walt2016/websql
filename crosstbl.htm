@@ -10,106 +10,148 @@
 </head>
 
 <body>
-        <div class="tools"></div>
-        <div class="demo"></div>
+    <div class="tools"></div>
+    <div class="demo"></div>
     <script src="websql.js"></script>
 
     <script>
         //special agreement
         var tp_sa = [{
-            prop: "sa_code",
-            label: "特约代码",
-            type: "string",
-            pk:true
-        },
-        {
-            prop: "risk_code",
-            label: "险种代码",
-            type: "string"
-        },
-        {
-            prop: "sa_text",
-            label: "特约内容",
-            type: "string"
-        }]
+                prop: "sa_code",
+                label: "特约代码",
+                type: "string",
+                pk: true
+            },
+            {
+                prop: "risk_code",
+                label: "险种代码",
+                type: "string"
+            },
+            {
+                prop: "sa_text",
+                label: "特约内容",
+                type: "string"
+            }
+        ]
 
         //dimension
-        var tp_dim=[{
-            prop: "dim_id",
-            label: "维度编码",
-            type: "string",
-            pk:true
-        },
-        {
-            prop: "dim_name",
-            label: "维度名称",
-            type: "string"
-        },
-        {
-            prop: "dim_level",
-            label: "维度优先级",
-            type: "string"
-        },
-        {
-            prop: "dim_type",
-            label: "维度类型",
-            type: "string"
-        }
+        var tp_dim = [{
+                prop: "dim_id",
+                label: "维度编码",
+                type: "string",
+                pk: true
+            },
+            {
+                prop: "dim_name",
+                label: "维度名称",
+                type: "string"
+            },
+            {
+                prop: "dim_level",
+                label: "维度优先级",
+                type: "string"
+            },
+            {
+                prop: "dim_type",
+                label: "维度类型",
+                type: "string"
+            }
 
         ]
 
         //交叉表
-        var tp_sa_dim=[
-        {
-            prop: "sa_code",
-            label: "特约代码",
-            type: "string"
-        },
-        {
-            prop: "dim_id",
-            label: "维度编码",
-            type: "string"
-        }
+        var tp_sa_dim = [{
+                prop: "sa_code",
+                label: "特约代码",
+                type: "string"
+            },
+            {
+                prop: "dim_id",
+                label: "维度编码",
+                type: "string"
+            }
 
         ]
 
         //交叉值表
-        var tp_sa_dim_val=[
-        {
-            prop: "sa_code",
-            label: "特约代码",
-            type: "string"
-        },
-        {
-            prop: "dim_id",
-            label: "维度编码",
-            type: "string"
-        },
-        {
-            prop: "dim_val",
-            label: "维度值",
-            type: "string"
-        }
+        var tp_sa_dim_val = [{
+                prop: "sa_code",
+                label: "特约代码",
+                type: "string"
+            },
+            {
+                prop: "dim_id",
+                label: "维度编码",
+                type: "string"
+            },
+            {
+                prop: "dim_val",
+                label: "维度值",
+                type: "string"
+            }
         ]
 
-        var tbls={
-            tp_sa:tp_sa,
-            tp_dim:tp_dim,
-            tp_sa_dim:tp_sa_dim,
-            tp_sa_dim_val:tp_sa_dim_val
+        var tbls = {
+            tp_sa: tp_sa,
+            tp_dim: tp_dim,
+            tp_sa_dim: tp_sa_dim,
+            tp_sa_dim_val: tp_sa_dim_val
         }
 
         var ws = websql({
             tbls: tbls,
             // data: data,
         })
-               // console.log(ws)
-               var tools=document.querySelector(".tools")
+        // console.log(ws)
+        var tools = document.querySelector(".tools")
         tools.appendChild(ws.createBtns());
         tools.appendChild(ws.createSqlcmd())
         // tools.appendChild(ws.createExeSqlHistory())
-        var demo=document.querySelector(".demo")
+        var demo = document.querySelector(".demo")
         demo.appendChild(ws.createSlide())
+
+        var a_idx = 0;
+
+        var _=ws._;
+
+        var clickHandle = function () {
+            var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业",
+                "诚信", "友善");
+            var $i = _.span(a[a_idx],{
+                "z-index": 9999,
+                "top": y - 20,
+                "left": x,
+                "position": "absolute",
+                "font-weight": "bold",
+                "color": "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 *
+                    Math.random()) + ")"
+            })
+            document.querySelector("body").appendChild($i)
+
+            // $("<span></span>").text(a[a_idx]);
+            a_idx = (a_idx + 1) % a.length;
+            var x = e.pageX,
+                y = e.pageY;
+            // $i.css({
+            //     "z-index": 9999,
+            //     "top": y - 20,
+            //     "left": x,
+            //     "position": "absolute",
+            //     "font-weight": "bold",
+            //     "color": "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 *
+            //         Math.random()) + ")"
+            // });
+            // $("body").append($i);
+            // $i.animate({
+            //         "top": y - 180,
+            //         "opacity": 0
+            //     },
+            //     1500,
+            //     function () {
+            //         $i.remove();
+            //     });
+
+        }
     </script>
 </body>
 
