@@ -633,6 +633,7 @@
                 var lineCenter = [];
                 if (children) {
                     var lis = children.map(function (t) {
+                        if(t.hide) return null;
                         return _.div(genLink(t), {
                             class: cls["2"]
                         })
