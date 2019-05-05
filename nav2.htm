@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="nav2.css">
+
+    <style>
+        /*!common:widget/menu/menu.less*/
+        .nav-menu-content {
+            width: 980px
+        }
+
+        .nav-menu-container {
+            z-index: 100;
+            position: relative
+        }
+
+        .nav-menu-container .nav-show-control {
+            height: 40px;
+            position: relative;
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+            overflow: hidden;
+        }
+        .nav-menu-container .nav-show-control:hover{
+            overflow: visible
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout {
+            box-shadow: 0 2px 15px #ccc;
+            height: 325px;
+            position: absolute;
+            width: 100%;
+            background-color: #f1f1f1;
+            background-color: rgba(243, 243, 243, .95);
+            transition: all .2s ease-in
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu {
+            height: 40px;
+            background: url(https://iknowpc.bdimg.com/static/common/widget/menu/img/menu-bg.ba369a0.png) repeat-x
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content {
+            margin: 0 auto;
+            position: relative
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box a,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box span {
+            font-family: "Microsoft YaHei", arial, courier new, courier, "\5b8b\4f53", monospace
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-box {
+            width: 64%;
+            display: inline;
+            float: left
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item {
+            display: inline;
+            float: left
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-title-icon {
+            width: 19px;
+            font-size: 12px;
+            position: absolute;
+            top: 7px;
+            left: 50%;
+            line-height: 1;
+            background: #EC5E24;
+            border-radius: 10px;
+            color: #FFF
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-title {
+            display: block;
+            cursor: pointer;
+            color: #fff;
+            font-size: 18px;
+            line-height: 40px;
+            height: 40px;
+            border-right: 1px solid #09a800;
+            text-align: center;
+            text-decoration: none;
+            position: relative
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-title .menu-title-icon {
+            margin-left: 20px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .current {
+            color: #faff64
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content {
+            height: 270px;
+            border-right: 1px solid transparent;
+            transition: all ease-in .2s;
+            padding-top: 15px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list {
+            *zoom: 1
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list:after {
+            content: "\0020";
+            display: block;
+            height: 0;
+            clear: both;
+            overflow: hidden;
+            visibility: hidden
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp {
+            display: inline;
+            float: left;
+            height: 30px;
+            text-align: center
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item {
+            text-decoration: none;
+            font-size: 14px;
+            line-height: 32px;
+            color: #353535;
+            position: relative
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item .menu-title-icon,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item .menu-title-icon {
+            top: -2px;
+            margin-left: 0
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item:hover,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item:hover {
+            color: #35b558;
+            border-bottom: 2px solid #4aca6d
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert {
+            height: 30px;
+            display: inline-block
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-name,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-name {
+            display: inline-block;
+            vertical-align: middle
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon {
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 48px;
+            margin-right: 5px;
+            width: 18px;
+            height: 20px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-jy,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-jy {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-ka,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-ka {
+            width: 19px;
+            height: 22px;
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-baby,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-baby {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-doctor,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-doctor {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-zuoye,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-zuoye {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-ciyuanfan,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-ciyuanfan {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-pi,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-pi {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert:hover,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert:hover {
+            border-bottom: 1px solid transparent
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-title {
+            background-color: #36ca61
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content {
+            background-color: #fff
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item {
+            color: #353535
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item:hover,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item:hover {
+            color: #35b558
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-jy,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-jy {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-ka,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-ka {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-baby,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-baby {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-doctor,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-doctor {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-zuoye,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-zuoye {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-pi,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert .expert-icon.expert-icon-pi {
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item.menu-sub-item-expert em.new-icon,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item:hover .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item.menu-sub-item-expert em.new-icon {
+            font-size: 12px;
+            color: red
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-index {
+            width: 10%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-index .menu-title {
+            text-align: left;
+            text-indent: 18px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-index:hover .menu-title {
+            background: 0 0
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-cat {
+            width: 25%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-cat .menu-content .menu-sub-list .menu-sub-item-wp {
+            width: 50%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-lanmu {
+            width: 25%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-lanmu .menu-content .menu-sub-list .menu-sub-item-wp {
+            width: 100%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user {
+            width: 25%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-sub-item-wp,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-sub-itemline-wp {
+            width: 50%;
+            line-height: 26px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item {
+            line-height: 28px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item .menu-title-icon,
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item .menu-title-icon {
+            left: 75px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-sub-itemline-wp {
+            width: auto;
+            float: none;
+            display: block
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-item-user-list {
+            width: 100%;
+            height: 26px;
+            line-height: 26px;
+            margin-top: 6px;
+            text-align: center;
+            color: #b8b8b8;
+            position: relative;
+            float: left;
+            font-family: 'Microsoft YaHei'
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-user .menu-content .menu-sub-list .menu-item-user-list .line-bar {
+            width: 181px;
+            height: 1px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -90px;
+            background: url(https://iknowpc.bdimg.com/static/common/widget/menu/img/list-bar.fda5865.png) repeat-x
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-expert {
+            width: 25%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-expert .menu-content {
+            border-right: 0
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-expert .menu-content .menu-sub-list .menu-sub-item-wp {
+            width: 100%;
+            text-align: left
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-jingyan {
+            width: 8%
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item-jingyan .menu-title {
+            border-right: 0
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section {
+            display: inline;
+            float: right;
+            width: 210px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-section-devide {
+            display: inline;
+            float: left;
+            width: 2px;
+            height: 40px;
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list {
+            display: inline;
+            float: left;
+            margin-top: -1px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list a:hover {
+            text-decoration: none
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .menu-right-list-item {
+            display: inline;
+            float: left;
+            text-align: center;
+            position: relative
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .menu-right-list-item .menu-right-list-link {
+            display: -moz-inline-box;
+            display: inline-block;
+            vertical-align: middle;
+            *vertical-align: auto;
+            *zoom: 1;
+            *display: inline;
+            line-height: 40px;
+            height: 40px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .menu-right-list-item .menu-right-list-link .item-icon {
+            display: -moz-inline-box;
+            display: inline-block;
+            vertical-align: middle;
+            *vertical-align: auto;
+            *zoom: 1;
+            *display: inline;
+            margin-right: 4px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .menu-right-list-item .menu-right-list-link .item-name {
+            display: -moz-inline-box;
+            display: inline-block;
+            vertical-align: middle;
+            *vertical-align: auto;
+            *zoom: 1;
+            *display: inline;
+            font-size: 16px;
+            color: #fff
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .menu-right-list-item .right-list-item-devide {
+            width: 1px;
+            height: 16px;
+            position: absolute;
+            right: -15px;
+            top: 13px;
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .open-dev .menu-right-list-link .item-icon {
+            width: 14px;
+            height: 14px;
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .zhidao-app {
+            margin-right: 30px
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .zhidao-app .menu-right-list-link .item-icon {
+            width: 10px;
+            height: 17px;
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-right-section .menu-right-list .user-center .menu-right-list-link .item-icon {
+            width: 16px;
+            height: 16px;
+            background-repeat: no-repeat;
+        }
+
+        .nav-menu-container .nav-show-control-show .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content {
+            border-color: #ddd
+        }
+
+        .nav-menu-container .nav-show-control-show .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-item-wp .menu-sub-item,
+        .nav-menu-container .nav-show-control-show .nav-menu-layout .nav-menu .nav-menu-content .content-box .menu-item .menu-content .menu-sub-list .menu-sub-itemline-wp .menu-sub-item {
+            color: #7d7d7d
+        }
+    </style>
+</head>
+
+
+
+<body>
+    <div class="nav-menu-container" id="j-nav-menu-container">
+        <div class="nav-show-control" >
+            <div class="nav-menu-layout">
+                <div class="nav-menu line">
+                    <div class="nav-menu-content container">
+                        <div class="content-box">
+                            <div class="menu-item menu-item-index">
+                                <a class="menu-title current" href="/">
+                                    首页</a>
+                            </div>
+                            <div class="menu-item-box">
+                                <div class="menu-item menu-item-cat">
+                                    <a class="menu-title " href="/list?fr=daohang" target="_blank">
+                                        问题</a>
+                                    <div class="menu-content">
+                                        <ul class="menu-sub-list">
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?fr=daohang" target="_blank">
+                                                    全部问题</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=101&amp;fr=daohang"
+                                                    target="_blank">
+                                                    经济金融</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=102&amp;fr=daohang"
+                                                    target="_blank">
+                                                    企业管理</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=103&amp;fr=daohang"
+                                                    target="_blank">
+                                                    法律法规</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=104&amp;fr=daohang"
+                                                    target="_blank">
+                                                    社会民生</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=105&amp;fr=daohang"
+                                                    target="_blank">
+                                                    科学教育</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=106&amp;fr=daohang"
+                                                    target="_blank">
+                                                    健康生活</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=107&amp;fr=daohang"
+                                                    target="_blank">
+                                                    体育运动</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=108&amp;fr=daohang"
+                                                    target="_blank">
+                                                    文化艺术</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=109&amp;fr=daohang"
+                                                    target="_blank">
+                                                    电子数码</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=110&amp;fr=daohang"
+                                                    target="_blank">
+                                                    电脑网络</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=111&amp;fr=daohang"
+                                                    target="_blank">
+                                                    娱乐休闲</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=113&amp;fr=daohang"
+                                                    target="_blank">
+                                                    行政地区</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=114&amp;fr=daohang"
+                                                    target="_blank">
+                                                    心理分析</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/list?cid=115&amp;fr=daohang"
+                                                    target="_blank">
+                                                    医疗卫生</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="menu-item menu-item-lanmu">
+                                    <a class="menu-title" href="javascript:;">
+                                        精选</a>
+                                    <div class="menu-content">
+                                        <ul class="menu-sub-list">
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item column-sub-item"
+                                                    href="/special/column?fr=daohang" target="_blank">
+                                                    知道专栏</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/daily?fr=daohang" target="_blank">
+                                                    知道日报</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="menu-item menu-item-user">
+                                    <a class="menu-title" href="javascript:;">
+                                        用户<div class="menu-title-icon">
+                                            <i class="iknow-icons"></i>
+                                        </div>
+                                    </a>
+                                    <div class="menu-content">
+                                        <ul class="menu-sub-list">
+                                            <li class="menu-sub-itemline-wp">
+                                                <a class="menu-sub-item metis-sub-item"
+                                                    href="/home/partnerhome?fr=daohang" target="_blank">
+                                                    知道合伙人<div class="menu-title-icon">
+                                                        <i class="iknow-icons"></i>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/uteam?fr=daohang" target="_blank">
+                                                    芝麻团</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/user/admin?fr=daohang" target="_blank">
+                                                    芝麻将</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/daily/authorcenter?fr=daohang"
+                                                    target="_blank">
+                                                    日报作者</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/misc/nowshowstar?fr=daohang"
+                                                    target="_blank">
+                                                    知道之星</a>
+                                            </li>
+                                            <div class="menu-item-user-list">机构合作<div class="line-bar"></div>
+                                            </div>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/opendev?fr=daohang" target="_blank">
+                                                    开放平台</a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/special/view/cooperation?fr=daohang"
+                                                    target="_blank">
+                                                    品牌合作</a>
+                                            </li>
+                                            <div class="menu-item-user-list">知道福利<div class="line-bar"></div>
+                                            </div>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item" href="/shop?fr=daohang" target="_blank">
+                                                    财富商城</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="menu-item menu-item-expert">
+                                    <a class="menu-title" href="javascript:;">
+                                        特色</a>
+                                    <div class="menu-content">
+                                        <ul class="menu-sub-list">
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item menu-sub-item-expert"
+                                                    href="http://jingyan.baidu.com/" target="_blank">
+                                                    <span class="expert-icon expert-icon-jy"></span>
+                                                    <span>经验</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item menu-sub-item-expert"
+                                                    href="https://baobao.baidu.com" target="_blank">
+                                                    <span class="expert-icon expert-icon-baby"></span>
+                                                    <span>宝宝知道</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-sub-item-wp">
+                                                <a class="menu-sub-item menu-sub-item-expert"
+                                                    href="https://www.zybang.com" target="_blank">
+                                                    <span class="expert-icon expert-icon-zuoye"></span>
+                                                    <span>作业帮</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-right-section">
+                                <ul class="menu-right-list">
+                                    <li class="menu-right-list-item zhidao-app">
+                                        <a href="/activity/simpleindexact?tplName=nareplace&amp;type=pc"
+                                            class="menu-right-list-link" target="_blank">
+                                            <span class="item-icon">
+                                            </span>
+                                            <span class="item-name">
+                                                手机版</span>
+                                        </a>
+                                        <span class="right-list-item-devide">
+                                        </span>
+                                    </li>
+                                    <li class="menu-right-list-item user-center">
+                                        <a href="/ihome" class="menu-right-list-link" target="_blank">
+                                            <span class="item-icon">
+                                            </span>
+                                            <span class="item-name">
+                                                我的知道</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="nav"></div>
+    <script src="websql.js"></script>
+    <!-- <script src="_menu2.js"></script> -->
+
+
+</body>
+
+</html>

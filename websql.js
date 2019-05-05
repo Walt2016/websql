@@ -66,6 +66,11 @@
             return obj;
         },
         addEvent: function (type, el, listener) {
+            if (arguments.length === 2 && _.type(arguments[1]) === "function") {
+                el = window;
+                listener = arguments[1]
+            }
+
             if (window.addEventListener) {
                 el.addEventListener(type, listener, false);
             } else {
@@ -303,15 +308,73 @@
             })
         },
         //遍历dom，操作
-        traversalWidth:function(el){
-            var children=el.children,len=children.length;
-            for(var i=0;i<len;i++){
-                var t=children[i]
-                if(parseInt(getComputedStyle(t)["width"]) >1000) {
+        traversalWidth: function (el) {
+            var children = el.children,
+                len = children.length;
+            for (var i = 0; i < len; i++) {
+                var t = children[i]
+                if (parseInt(getComputedStyle(t)["width"]) > 1000) {
                     // t.setAttribute("witdh","100%")
-                    t.style.width="100%"                    
+                    t.style.width = "100%"
                     _.traversalWidth(t)
                 }
+            }
+        },
+        //允许一次加多个样式
+        //去重
+        addClass: function (el, cls) {
+            var arr1 = el.className.split(" ")
+            var arr2 = cls.split(" ")
+            var obj = {}
+            arr1.forEach(function (t) {
+                obj[t] = 1
+            })
+            arr2.forEach(function (t) {
+                obj[t] = 1
+            })
+            var keys = []
+            for (var key in obj) {
+                keys.push(key)
+            }
+            el.className = keys.join(" ")
+            return el;
+        },
+        removeClass: function (el, cls) {
+            var arr1 = el.className.split(" ")
+            var arr2 = cls.split(" ")
+            var obj = {}
+            arr1.forEach(function (t) {
+                if (arr2.indexOf(t) === -1) {
+                    obj[t] = 1
+                }
+            })
+            var keys = []
+            for (var key in obj) {
+                keys.push(key)
+            }
+            el.className = keys.join(" ")
+            return el;
+        },
+        show: function (el) {
+            _.removeClass(el, "hide")
+            _.addClass(el, "show")
+        },
+        hide: function (el) {
+            _.removeClass(el, "show")
+            _.addClass(el, "hide")
+        },
+        click: function (el, callback) {
+            _.addEvent("click", el, callback)
+        },
+        hasClass: function (el, cls) {
+            var arr = el.className.split(" ")
+            return arr.indexOf(cls) >= 0
+        },
+        getStyle: function (el, attr) {
+            if (el.currentStyle) {
+                return el.currentStyle[attr];
+            } else {
+                return getComputedStyle(el, false)[attr];
             }
         }
     };
@@ -633,7 +696,7 @@
                 var lineCenter = [];
                 if (children) {
                     var lis = children.map(function (t) {
-                        if(t.hide) return null;
+                        if (t.hide) return null;
                         return _.div(genLink(t), {
                             class: cls["2"]
                         })
@@ -644,7 +707,7 @@
                 }
 
                 // var active = url.indexOf(t.url) >= 0 ? " active" : "";
-                var active=checkActive(t)? " active" : "";
+                var active = checkActive(t) ? " active" : "";
 
                 return _.div([genLink(t)].concat(lineCenter), {
                     class: cls["0"] + active,
